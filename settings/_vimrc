@@ -81,6 +81,11 @@ function UpdateCscope()
 endfunction
 map <C-F10>c :call UpdateCscope() <CR>
 
+"代码格式
+function FormatCode()
+    silent! execute "%!astyle --ascii --style=allman --indent=spaces=4 --indent-classes --indent-switches --indent-cases --indent-preprocessor --indent-col1-comments --min-conditional-indent=0 --max-instatement-indent=60 --break-blocks=all --pad-oper --pad-header --align-pointer=middle --align-reference=type --add-brackets --convert-tabs --lineend=linux"
+endfunction
+map <C-S-F> :call FormatCode() <CR>
 
 set diffexpr=MyDiff()
 function MyDiff()
