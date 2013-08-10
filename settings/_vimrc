@@ -24,8 +24,8 @@ filetype plugin on
 set ru
 
 "启动窗口位置&大小
-winpos 150 60
-set lines=40 columns=140
+winpos 170 60
+set lines=50 columns=170
 
 """"""""""""""""""""""""""""""""
 "解决编码问题
@@ -62,12 +62,12 @@ let Agrep_Path = 'C:\MinGW\msys\1.0\bin\agrep.exe'
 let Grep_Find_Path = 'C:\MinGW\msys\1.0\bin\find.exe'
 let Grep_Xargs_Path = 'C:\MinGW\msys\1.0\bin\xargs.exe'
 let Grep_Default_Filelist = '*.c *.cpp *.h'
-let Grep_Skip_Dirs = '.svn'
+let Grep_Skip_Dirs = '.svn .git'
 
 "cscopes使用
 function UpdateCscope()
     cs kill 0
-    !D:\TOOLS\Vim\vimSupport\builldcscope.bat
+    !C:\gVim\vimSupport\builldcscope.bat
     cs add cscope.out
 endfunction
 map <C-F10>c :call UpdateCscope() <CR>
