@@ -71,7 +71,12 @@ let Grep_Skip_Dirs = '.svn .git'
 "cscopes使用
 function UpdateCscope()
     cs kill 0
-    !C:\gVim\vimSupport\builldcscope.bat
+    "silent! execute "!find -name '*.c' -o -name '*.cpp' -o -name '*.cc' -o -name '*.h' -o -name '*.hpp' -o -name '*.java' -type f > tmplist"
+    silent! execute "!dir *.cpp *.h *.hpp *.c *.java *.cc /s /B > tmplist"
+    silent! execute "!cscope -bqk -i tmplist"
+    silent! execute "!ctags -R -L tmplist"
+    "silent! execute "!rm -f tmplist"
+    silent! execute "!del tmplist"
     cs add cscope.out
 endfunction
 map <C-F10>c :call UpdateCscope() <CR>
