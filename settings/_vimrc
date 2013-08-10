@@ -1,0 +1,96 @@
+set nocompatible
+set nu!
+colorscheme torte
+"syntax enable
+if has("syntax")
+    syntax on
+endif
+
+set softtabstop=4
+
+set backspace=2
+set hlsearch 
+set incsearch
+
+"代码风格统一
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set cindent
+
+filetype plugin on
+
+"状态栏
+:set ru
+
+"启动窗口位置&大小
+winpos 150 60
+set lines=40 columns=140
+
+""""""""""""""""""""""""""""""""
+"解决编码问题
+""""""""""""""""""""""""""""""""
+set langmenu=zh_CN.utf-8
+set encoding=utf-8
+set fileencodings=utf-8,chinese,latin-1
+if has("win32")
+    set fileencoding=chinese
+else
+    set fileencoding=utf-8
+endif
+"解决菜单乱码问题
+source $VIMRUNTIME/delmenu.vim
+source $VIMRUNTIME/menu.vim
+"解决console输出乱码
+language messages zh_CN.utf-8
+
+"换字体
+set guifont=Bitstream_Vera_Sans_Mono:h10:cANSI
+set gfw=Yahei_Mono:h10.5:cGB2312
+
+"TList插件
+let Tlist_Show_One_File=1
+let Tlist_Exit_OnlyWindow=1
+"winmanager
+let g:winManagerWindowLayout='FileExplorer|TagList'
+nmap !m :WMToggle<cr>
+
+"a.vim 快速切换头和源文件
+nnoremap <silent> <F12> :A<CR>
+"grep.vim 工程中快速查找
+nnoremap <silent> <F3> :Grep<CR>
+
+"cscopes使用
+function UpdateCscope()
+    cs kill 0
+    !D:\TOOLS\Vim\vimSupport\builldcscope.bat
+    cs add cscope.out
+endfunction
+map <C-F10>c :call UpdateCscope() <CR>
+
+
+set diffexpr=MyDiff()
+function MyDiff()
+  let opt = '-a --binary '
+  if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+  if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+  let arg1 = v:fname_in
+  if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+  let arg2 = v:fname_new
+  if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+  let arg3 = v:fname_out
+  if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+  let eq = ''
+  if $VIMRUNTIME =~ ' '
+    if &sh =~ '\<cmd'
+      let cmd = '""' . $VIMRUNTIME . '\diff"'
+      let eq = '"'
+    else
+      let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+    endif
+  else
+    let cmd = $VIMRUNTIME . '\diff'
+  endif
+  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3 . eq
+endfunction
+
