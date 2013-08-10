@@ -7,8 +7,10 @@ if has("syntax")
     syntax on
 endif
 
-set softtabstop=4
-set backspace=2
+"文件编码相关
+set fileformat=unix
+
+"搜索相关
 set hlsearch 
 set incsearch
 
@@ -17,6 +19,8 @@ set expandtab
 set tabstop=4
 set shiftwidth=4
 set cindent
+set softtabstop=4
+set backspace=2
 
 filetype plugin on
 
