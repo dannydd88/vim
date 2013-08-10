@@ -1,13 +1,13 @@
 set nocompatible
 set nu!
 colorscheme torte
+
 "syntax enable
 if has("syntax")
     syntax on
 endif
 
 set softtabstop=4
-
 set backspace=2
 set hlsearch 
 set incsearch
@@ -21,7 +21,7 @@ set cindent
 filetype plugin on
 
 "状态栏
-:set ru
+set ru
 
 "启动窗口位置&大小
 winpos 150 60
@@ -44,21 +44,23 @@ source $VIMRUNTIME/menu.vim
 "解决console输出乱码
 language messages zh_CN.utf-8
 
-"换字体
-set guifont=Bitstream_Vera_Sans_Mono:h10:cANSI
-set gfw=Yahei_Mono:h10.5:cGB2312
-
-"TList插件
-let Tlist_Show_One_File=1
-let Tlist_Exit_OnlyWindow=1
-"winmanager
-let g:winManagerWindowLayout='FileExplorer|TagList'
-nmap !m :WMToggle<cr>
+""换字体
+"set guifont=Bitstream_Vera_Sans_Mono:h10:cANSI
+"set gfw=Yahei_Mono:h10.5:cGB2312
 
 "a.vim 快速切换头和源文件
 nnoremap <silent> <F12> :A<CR>
 "grep.vim 工程中快速查找
 nnoremap <silent> <F3> :Grep<CR>
+"grep path (need mingw)
+let Grep_Skip_Files = '*.bak *~'
+let Grep_Path = 'C:\MinGW\msys\1.0\bin\grep.exe'
+let Fgrep_Path = 'C:\MinGW\msys\1.0\bin\fgrep.exe'
+let Egrep_Path = 'C:\MinGW\msys\1.0\bin\egrep.exe'
+let Agrep_Path = 'C:\MinGW\msys\1.0\bin\agrep.exe'
+let Grep_Find_Path = 'C:\MinGW\msys\1.0\bin\find.exe'
+let Grep_Xargs_Path = 'C:\MinGW\msys\1.0\bin\xargs.exe'
+let Grep_Default_Filelist = '*.c *.cpp *.h'
 
 "cscopes使用
 function UpdateCscope()
@@ -94,3 +96,11 @@ function MyDiff()
   silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3 . eq
 endfunction
 
+"""""""""""""""""""""""""""""""""
+"abandon plusin
+""TList插件
+"let Tlist_Show_One_File=1
+""let Tlist_Exit_OnlyWindow=1
+""winmanager
+"let g:winManagerWindowLayout='FileExplorer|TagList'
+""nmap !m :WMToggle<cr>
