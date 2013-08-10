@@ -373,11 +373,12 @@ endif
 
 " Character to use to quote patterns and filenames before passing to grep.
 if !exists("Grep_Shell_Quote_Char")
-    if has("win32") || has("win16") || has("win95")
-        let Grep_Shell_Quote_Char = ''
-    else
-        let Grep_Shell_Quote_Char = "'"
-    endif
+    "if has("win32") || has("win16") || has("win95")
+    "    let Grep_Shell_Quote_Char = ''
+    "else
+    "    let Grep_Shell_Quote_Char = "'"
+    "endif
+    let Grep_Shell_Quote_Char = "'"
 endif
 
 " Character to use to escape special characters before passing to grep.
@@ -554,7 +555,8 @@ function! s:RunGrepRecursive(cmd_name, grep_cmd, action, ...)
             if find_prune != ''
                 let find_prune = find_prune . ' -o'
             endif
-            let find_prune = find_prune . ' -name ' . one_dir
+            let find_prune = find_prune . ' -name ' . 
+                \ g:Grep_Shell_Quote_Char . one_dir . g:Grep_Shell_Quote_Char
             let txt = strpart(txt, stridx(txt, ' ') + 1)
         endwhile
         let find_prune = '-type d ' . g:Grep_Shell_Escape_Char . '(' .
