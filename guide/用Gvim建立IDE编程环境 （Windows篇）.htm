@@ -1,0 +1,458 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" dir="ltr"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>用Gvim建立IDE编程环境 （Windows篇） - 敲代码 - ITeye技术网站</title>
+    <meta name="description" content="转载自：LeeMonCC      说明：本文是作者在完全按照著名的《手把手教你把Vim改装成一个IDE编程环境》一文，在Windows XP上用gvim建立IDE环境时所作的备忘。原作地址：http://blog.csdn.net/wooin/archive/2007/10/31/1858917.aspx。  0.准备软件及插件。(a)gvim72.exe&nbsp;地址ftp://ftp.vim.org/ ...">
+    <meta name="keywords" content="编程, IDE, Windows, vim, PHP 用Gvim建立IDE编程环境 （Windows篇）">
+    <link rel="shortcut icon" href="http://rokin.iteye.com/images/favicon.ico" type="image/x-icon">
+    <link rel="search" type="application/opensearchdescription+xml" href="http://rokin.iteye.com/open_search.xml" title="ITeye">
+    <link href="http://rokin.iteye.com/rss" rel="alternate" title="敲代码" type="application/rss+xml">
+    <link href="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/blog.css" media="screen" rel="stylesheet" type="text/css">
+<link href="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/purple.css" media="screen" rel="stylesheet" type="text/css">
+    <script src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/application.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-535605-1']);
+  _gaq.push(['_setDomainName', '.iteye.com']);
+  _gaq.push(['_setAllowHash', 'false']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+      <link href="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/SyntaxHighlighter.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/shCoreCommon.js" type="text/javascript"></script>
+<script src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/hotkey.js" type="text/javascript"></script>
+  <script src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/code_favorites.js" type="text/javascript"></script>
+<script src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/weiboshare.js" type="text/javascript"></script>
+  <style>
+    div#main {background-color: transparent; border: 0; padding: 0px; width: 740px;}
+  </style>
+  <link href="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/ui.css" media="screen" rel="stylesheet" type="text/css">
+  <script src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/compress.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="header">
+      <div id="blog_site_nav">
+  <a href="http://www.iteye.com/" class="homepage">首页</a>
+  <a href="http://www.iteye.com/news">资讯</a>
+  <a href="http://www.iteye.com/forums">论坛</a>
+  <a href="http://www.iteye.com/ask">问答</a>
+  <a href="http://www.iteye.com/blogs">博客</a>
+  <a href="http://www.iteye.com/groups">群组</a>
+  <a href="#" onclick="return false;" id="msna"><u>更多</u> <small>▼</small></a>
+  <div class="quick_menu" style="display:none;">
+    <a href="http://www.iteye.com/job">招聘</a>
+    <a href="http://www.iteye.com/search">搜索</a>
+  </div>
+</div>
+      <div id="user_nav">
+      <a href="http://rokin.iteye.com/login" class="welcome" title="登录">您还未登录 !</a>
+    <a href="http://www.iteye.com/all" style="color: red;">我的应用</a>
+    <a href="http://rokin.iteye.com/login">登录</a>
+    <a href="http://rokin.iteye.com/signup" class="nobg">注册</a>
+  </div>
+    </div>
+
+    <div id="page">
+      <div id="branding" class="clearfix">
+        <div id="blog_name"><h1><a href="http://rokin.iteye.com/">敲代码</a></h1></div>
+        <div id="blog_preview">
+          
+        </div>
+        <div id="blog_domain">永久域名 <a href="http://rokin.iteye.com/">http://rokin.iteye.com</a></div>
+      </div>
+      
+      <div id="content" class="clearfix">
+        <div id="main">
+          
+
+
+          
+
+
+<div class="blog_main">
+  <div class="blog_nav">
+    
+    <div class="pre_next">
+      <a href="http://rokin.iteye.com/blog/493963" class="next" title="Oracle中日期时间的操作比较和加减-入门基础">Oracle中日期时间的操作比较和加减-入门基 ...</a>
+      |
+      <a href="http://rokin.iteye.com/blog/475257" class="pre" title="手把手教你把Vim改装成一个IDE编程环境(图文)">手把手教你把Vim改装成一个IDE编程环境( ...</a>
+    </div>
+  </div>
+  <div class="blog_title">
+    <div class="date"><span class="year">2009</span><span class="sep_year">-</span><span class="month">09</span><span class="sep_month">-</span><span class="day">23</span></div>
+    <h3>
+      <a href="http://rokin.iteye.com/blog/475274">用Gvim建立IDE编程环境 （Windows篇）</a>
+      <em class="actions">      </em>
+    </h3>
+    <ul class="blog_categories"><strong>博客分类：</strong> <li><a href="http://rokin.iteye.com/category/80481">linux</a></li> </ul>
+        <div class="news_tag"><a href="http://www.iteye.com/blogs/tag/%E7%BC%96%E7%A8%8B">编程</a><a href="http://www.iteye.com/blogs/tag/IDE">IDE</a><a href="http://www.iteye.com/blogs/tag/Windows">Windows</a><a href="http://www.iteye.com/blogs/tag/vim">vim</a><a href="http://www.iteye.com/blogs/tag/PHP">PHP</a></div>
+  </div>
+
+  <div id="blog_content" class="blog_content">
+    <p>转载自：<a href="http://hi.baidu.com/leemoncc/blog/item/a6be15cf40d7ab31b600c806.html" target="_blank">LeeMonCC</a></p>
+<p><span>
+</span></p>
+<p style="line-height: normal;">说明：本文是作者在完全按照著名的《手把手教你把Vim改装成一个IDE编程环境》一文，在Windows XP上用gvim建立IDE环境时所作的备忘。<br style="line-height: normal;">原作地址：<a style="line-height: normal;" href="http://blog.csdn.net/wooin/archive/2007/10/31/1858917.aspx">http://blog.csdn.net/wooin/archive/2007/10/31/1858917.aspx</a>。</p>
+<p style="line-height: normal;"><br style="line-height: normal;"><strong style="line-height: normal;">0.准备软件及插件。</strong><br style="line-height: normal;">(a)<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">gvim72.exe</span>&nbsp;地址<a style="line-height: normal;" href="ftp://ftp.vim.org/pub/vim/pc/gvim72.exe">ftp://ftp.vim.org/pub/vim/pc/gvim72.exe</a>。<br style="line-height: normal;">(b)<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">vimcdoc-1.7.0-setup.exe</span>&nbsp;地址<a style="line-height: normal;" href="http://prdownloads.sourceforge.net/vimcdoc/vimcdoc-1.7.0-setup.exe?download">http://prdownloads.sourceforge.net/vimcdoc/vimcdoc-1.7.0-setup.exe?download</a><br style="line-height: normal;">(c)<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">ec57w32.zip</span>&nbsp;地址<a style="line-height: normal;" href="http://prdownloads.sourceforge.net/ctags/ec57w32.zip">http://prdownloads.sourceforge.net/ctags/ec57w32.zip</a><br style="line-height: normal;">(d)<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">taglist_45.zip</span>&nbsp;地址<a style="line-height: normal;" href="http://www.vim.org/scripts/download_script.php?src_id=7701">http://www.vim.org/scripts/download_script.php?src_id=7701</a><br style="line-height: normal;">(e)<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">winmanager.zip</span>&nbsp;地址<a style="line-height: normal;" href="http://www.vim.org/scripts/download_script.php?src_id=754">http://www.vim.org/scripts/download_script.php?src_id=754</a><br style="line-height: normal;">(f)<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">minibufexpl.vim</span>&nbsp;地址<a style="line-height: normal;" href="http://www.vim.org/scripts/download_script.php?src_id=3640">http://www.vim.org/scripts/download_script.php?src_id=3640</a><br style="line-height: normal;">(g)<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">a.vim</span>&nbsp;地址<a style="line-height: normal;" href="http://www.vim.org/scripts/download_script.php?src_id=7218">http://www.vim.org/scripts/download_script.php?src_id=7218</a><br style="line-height: normal;">(h)<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">grep.vim</span>&nbsp;地址<a style="line-height: normal;" href="http://www.vim.org/scripts/download_script.php?src_id=7645">http://www.vim.org/scripts/download_script.php?src_id=7645</a><br style="line-height: normal;">(i)<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">visualmark.vim</span>&nbsp;地址<a style="line-height: normal;" href="http://www.vim.org/scripts/download_script.php?src_id=4700">http://www.vim.org/scripts/download_script.php?src_id=4700</a></p>
+<p style="line-height: normal;"><strong style="line-height: normal;">1.安装gvim7.2。</strong><br style="line-height: normal;">运行<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">gvim72.exe</span>，选择完全安装(Full)，我的安装目录是默认的<span style="line-height: normal; font-family: 'Times New Roman'; color: #339966; font-size: x-small;">C:\Program Files\Vim</span>。<br style="line-height: normal;">安装完成后，包括了文件夹vim72和文件夹vimfiles，以及脚本_vimrc。</p>
+<p style="line-height: normal;"><strong style="line-height: normal;">2.安装中文帮助手册。</strong><br style="line-height: normal;">运行<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">vimcdoc-1.7.0-setup.exe</span>，它会自动找到gvim的安装位置。<br style="line-height: normal;">安装完毕后重新打开gvim，<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">:help</span>&nbsp;时帮助手册已经是中文的了。<br style="line-height: normal;">进行到这一步时，我的gvim菜单处的中文出现了乱码。<br style="line-height: normal;">在网上寻找解决方案，将<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">C:\Program Files\Vim\vim72</span>下名为&nbsp;<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">lang</span>&nbsp;的文件夹删去，使菜单语言变为英语。</p>
+<p style="line-height: normal;"><strong style="line-height: normal;">3.语法高亮。<br style="line-height: normal;"></strong>首先，编辑_vimrc文件加入以下内容：<br style="line-height: normal;"><span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">set nu!<br style="line-height: normal;">colorscheme desert<br style="line-height: normal;">syntax enable<br style="line-height: normal;">syntax on<br style="line-height: normal;"></span>这些设置使得gvim可以显示行号，并使用了desert配色方案，而且打开了语法高亮功能（用不同颜色显示注释、关键字、字符串等）。<br style="line-height: normal;">我们还可以让函数名也高亮起来，在<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">C:\Program Files\Vim\vim72\syntax</span>下找到&nbsp;<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">c.vim</span>&nbsp;和&nbsp;<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">cpp.vim</span>，分别添加以下内容：<br style="line-height: normal;"><span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">syn match cFunction "\&lt;[a-zA-Z_][a-zA-Z_0-9]*\&gt;[^()]*)("me=e-2<br style="line-height: normal;">syn match cFunction "\&lt;[a-zA-Z_][a-zA-Z_0-9]*\&gt;\s*("me=e-1<br style="line-height: normal;">hi cFunction gui=NONE guifg=#B5A1FF<br style="line-height: normal;"></span>重新打开gvim，效果如下：</p>
+<p><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/ec587483-d168-3ac6-a9b6-3a0be65210ab.jpg" alt=""></p>
+&nbsp;
+<p style="line-height: normal;"><strong style="line-height: normal;">4.程序中跳转。<br style="line-height: normal;"></strong>将<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">ec57w32.zip</span>解压，在解压后文件夹中找到<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">ctags.exe</span>，将其复制到<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">C:\ProgramFiles\Vim\vim72</span>下，并编辑_vimrc文件，添加以下内容：<br style="line-height: normal;"><span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">set tags=tags;<br style="line-height: normal;">set autochdir<br style="line-height: normal;"></span>打开cmd命令行，切换到你要查看的源代码的根目录处，运行<br style="line-height: normal;"><span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">ctags -R</span><br style="line-height: normal;">将会在此目录处生成一个tags文件。<br style="line-height: normal;">用gvim打开一个代码文件，将光标放到某一函数名上，如下图的UpdateViewByPosNo()，按下"ctrl+]"，光标会自动跳转到定义处。</p>
+<div style="font-family: Georgia; font-size: 14px; line-height: normal;">&nbsp;</div>
+<p><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/ec320ca9-7896-36db-ada0-d2c972ff614b.jpg" alt=""></p>
+&nbsp;
+<p style="line-height: normal;">按下"ctrl+T"会跳回到原来的位置。<br style="line-height: normal;">变量、结构体、宏等等，都可以这样做。<br style="line-height: normal;">当你的源文件有更新时，只能重新运行<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">ctags -R</span>命令，来更新tags文件。</p>
+<p style="line-height: normal;"><strong style="line-height: normal;">5.窗口管理。</strong><br style="line-height: normal;">将<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">taglist_45.zip</span>解压，解压后包含一个doc文件夹和一个plugin文件夹，将其中内容分别复制到<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">C:\Program Files\Vim\vim72</span>下的doc及plugin中。<br style="line-height: normal;">在_vimrc文件中加入以下内容：<br style="line-height: normal;"><span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">let Tlist_Show_One_File=1<br style="line-height: normal;">let Tlist_Exit_OnlyWindow=1</span><br style="line-height: normal;">用gvim打开代码文件（已生成过tags文件），<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">:Tlist</span>，TagList窗口即出现在左侧。<br style="line-height: normal;">用相同的方法将<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">winmanager.zip</span>解压和拷贝，在_vimrc文件中加入以下内容：<br style="line-height: normal;"><span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">let g:winManagerWindowLayout='FileExplorer|TagList'<br style="line-height: normal;">nmap wm :WMToggle&lt;cr&gt;</span><br style="line-height: normal;">用gvim打开代码文件，normal状态下输入命令"<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">wm</span>"，窗口如下</p>
+<div style="font-family: Georgia; font-size: 14px; line-height: normal;">
+<br><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/aa1b901a-4ba6-3ec4-9d14-aef5ec02111c.jpg" alt=""><br>&nbsp;<br><span style="font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12px;">其中左上是netrw窗口（浏览文件），左下是TagList窗口，再次输入"<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">wm</span>"时这两个窗口会关闭。</span>
+</div>
+<p style="line-height: normal;"><strong style="line-height: normal;">6.多文件编辑。</strong><br style="line-height: normal;">将<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">minibufexpl.vim</span>复制到<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">C:\Program Files\Vim\vim72\plugin</span>，在_vimrc中添加：<br style="line-height: normal;"><span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">let g:miniBufExplMapCTabSwitchBufs=1<br style="line-height: normal;">let g:miniBufExplMapWindowsNavVim=1<br style="line-height: normal;">let g:miniBufExplMapWindowNavArrows=1</span><br style="line-height: normal;">当用gvim打开两个或两个以上的文件时，会自动弹出MiniBufExplorer窗口，如下图</p>
+<div style="font-family: Georgia; font-size: 14px; line-height: normal;">
+<br><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/1b4fbbae-ede4-30c6-8237-34a1fdd6ddcd.jpg" alt=""><br>&nbsp;</div>
+<p style="line-height: normal;">ctrl+Tab，切换到前一个buffer，并在当前窗口打开文件；<br style="line-height: normal;">ctrl+shift+Tab，切换到后一个buffer，并在当前窗口打开文件；<br style="line-height: normal;">ctrl+箭头键，可以切换到上下左右窗口中；<br style="line-height: normal;">ctrl+h,j,k,l，切换到上下左右的窗口中。</p>
+<p style="line-height: normal;"><br style="line-height: normal;"><strong style="line-height: normal;">7.快速切换头文件/源文件。</strong><br style="line-height: normal;">将<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">a.vim</span>复制到<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">C:\Program Files\Vim\vim72\plugin</span>，在_vimrc中添加：<br style="line-height: normal;"><span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">nnoremap &lt;silent&gt; &lt;F12&gt; :A&lt;CR&gt;</span><br style="line-height: normal;">用gvim打开源码文件后，按F12即可以在c/h文件中切换，也可以通过输入:A实现。</p>
+<p style="line-height: normal;"><strong style="line-height: normal;">8.在工程中快速查找。</strong><br style="line-height: normal;">将<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000; font-size: small;">grep.vim</span>复制到<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">C:\Program Files\Vim\vim72\plugin</span>，在_vimrc中添加：<br style="line-height: normal;"><span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">nnoremap &lt;silent&gt; &lt;F3&gt; :Grep&lt;CR&gt;<br style="line-height: normal;"></span>用gvim打开源码文件，并将光标定位到要查找的内容上，按下F3，确定要查找的内容和搜索范围，gvim会在弹出的QuickFix窗口中列出所有符合条件的搜索结果。如下图</p>
+<div style="font-family: Georgia; font-size: 14px; line-height: normal;">
+<br><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/1165401b-de4f-3f2c-84a8-f2a255b8e214.jpg" alt=""><br>&nbsp;</div>
+<p style="line-height: normal;">确定查找内容时，支持正则表达式。</p>
+<p style="line-height: normal;"><strong style="line-height: normal;">9.高亮的书签。</strong><br style="line-height: normal;">将<span style="line-height: normal; font-family: 'Times New Roman'; color: #ff0000;">visualmark.vim</span>复制到<span style="line-height: normal; font-family: 'Times New Roman'; color: #008080; font-size: x-small;">C:\Program Files\Vim\vim72\plugin</span>。<br style="line-height: normal;">用gvim打开源码文件，将光标定位在需要添加书签的地方，按下ctrl+F2，即添加了书签。</p>
+<div style="font-family: Georgia; font-size: 14px; line-height: normal;">
+<br><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/674b6a5d-c18f-30d9-a1d5-1b41cafdf3ff.jpg" alt=""><br>&nbsp;</div>
+<p style="line-height: normal;">使用F2在书签之间正向切换，shift+F2反向切换。</p>
+<p>&nbsp;</p>
+  </div>
+
+  
+  <div class="attachments">
+    
+      
+        <ul style="display:none;">
+          <li><a href="http://dl.iteye.com/upload/attachment/149865/ec320ca9-7896-36db-ada0-d2c972ff614b.jpg" target="_blank"><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/ec320ca9-7896-36db-ada0-d2c972ff614b-thumb.jpg" class="magplus" title="点击查看原始大小图片"></a></li>
+          
+          <li>大小: 72.8 KB</li>
+        </ul>
+      
+    
+      
+        <ul style="display:none;">
+          <li><a href="http://dl.iteye.com/upload/attachment/149867/1b4fbbae-ede4-30c6-8237-34a1fdd6ddcd.jpg" target="_blank"><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/1b4fbbae-ede4-30c6-8237-34a1fdd6ddcd-thumb.jpg" class="magplus" title="点击查看原始大小图片"></a></li>
+          
+          <li>大小: 3.5 KB</li>
+        </ul>
+      
+    
+      
+        <ul style="display:none;">
+          <li><a href="http://dl.iteye.com/upload/attachment/149869/1165401b-de4f-3f2c-84a8-f2a255b8e214.jpg" target="_blank"><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/1165401b-de4f-3f2c-84a8-f2a255b8e214-thumb.jpg" class="magplus" title="点击查看原始大小图片"></a></li>
+          
+          <li>大小: 141 KB</li>
+        </ul>
+      
+    
+      
+        <ul style="display:none;">
+          <li><a href="http://dl.iteye.com/upload/attachment/149871/674b6a5d-c18f-30d9-a1d5-1b41cafdf3ff.jpg" target="_blank"><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/674b6a5d-c18f-30d9-a1d5-1b41cafdf3ff-thumb.jpg" class="magplus" title="点击查看原始大小图片"></a></li>
+          
+          <li>大小: 79.6 KB</li>
+        </ul>
+      
+    
+      
+        <ul style="display:none;">
+          <li><a href="http://dl.iteye.com/upload/attachment/149873/aa1b901a-4ba6-3ec4-9d14-aef5ec02111c.jpg" target="_blank"><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/aa1b901a-4ba6-3ec4-9d14-aef5ec02111c-thumb.jpg" class="magplus" title="点击查看原始大小图片"></a></li>
+          
+          <li>大小: 126 KB</li>
+        </ul>
+      
+    
+      
+        <ul style="display:none;">
+          <li><a href="http://dl.iteye.com/upload/attachment/149876/ec587483-d168-3ac6-a9b6-3a0be65210ab.jpg" target="_blank"><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/ec587483-d168-3ac6-a9b6-3a0be65210ab-thumb.jpg" class="magplus" title="点击查看原始大小图片"></a></li>
+          
+          <li>大小: 71.1 KB</li>
+        </ul>
+      
+    
+    
+      <ul>
+        <li><a href="#" onclick="$$('div.attachments ul').invoke('show');$(this).up(1).hide();return false;">查看图片附件</a></li>
+      </ul>
+    
+  </div>
+
+
+
+  <script type="text/javascript"><!--
+google_ad_client = "pub-1076724771190722";
+/* JE个人博客468x60 */
+google_ad_slot = "5506163105";
+google_ad_width = 468;
+google_ad_height = 60;
+//-->
+</script>
+<script type="text/javascript" src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/show_ads.js">
+</script>
+  
+  <div id="bottoms" class="clearfix">
+    
+    <div id="share_weibo">分享到：
+      <a data-type="sina" href="javascript:;" title="分享到新浪微博"><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/t_sina.gif"></a>
+      <a data-type="qq" href="javascript:;" title="分享到腾讯微博"><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/t_qq.gif"></a>
+    </div>
+  </div>
+
+  <div class="blog_nav">
+    <div class="pre_next">
+      <a href="http://rokin.iteye.com/blog/493963" class="next" title="Oracle中日期时间的操作比较和加减-入门基础">Oracle中日期时间的操作比较和加减-入门基 ...</a>
+      |
+      <a href="http://rokin.iteye.com/blog/475257" class="pre" title="手把手教你把Vim改装成一个IDE编程环境(图文)">手把手教你把Vim改装成一个IDE编程环境( ...</a>
+    </div>
+  </div>
+  <div class="blog_bottom">
+    <ul>
+      <li>17:47</li>
+      <li>浏览 (14219)</li>
+      
+      <li><a href="#comments">评论</a> (0)</li>
+      
+                  
+      <li class="last"><a href="http://www.iteye.com/wiki/blog/475274" target="_blank" class="more">相关推荐</a></li>
+    </ul>
+  </div>
+
+  <div class="blog_comment">
+    <h5>评论</h5>
+    <a id="comments" name="comments"></a>
+    
+    
+    
+  </div>
+
+  <div class="blog_comment">
+    <h5>发表评论</h5>
+            <form action="/blog/475274" id="comment_form" method="post" onsubmit="return false;">          
+
+
+  <input id="editor_bbcode_flag" type="hidden">
+
+
+
+<div id="editor_main"><textarea class="validate-richeditor bad-words min-length-5" cols="40" id="editor_body" name="comment[body]" rows="20" style="width: 500px; height: 350px;"></textarea></div>
+
+
+<script type="text/javascript">
+  var editor = new Control.TextArea.Editor("editor_body", "bbcode", false);
+</script>
+          <p style="text-align:right;padding-right:30px;">您还没有登录，请<a href="http://rokin.iteye.com/login">登录</a>后发表评论(快捷键 Alt+S / Ctrl+Enter) <input class="submit" id="quick_reply_button" name="commit" value="提交" type="submit"></p>
+       </form>
+        <script type="text/javascript">
+          new HotKey("s",function() {$('quick_reply_button').click();},{altKey: true, ctrlKey: false});
+          new HotKey(new Number(13),function() {$('quick_reply_button').click();},{altKey: false, ctrlKey: true});
+
+          new Validation("comment_form", {immediate: false, onFormValidate: function(result, form){
+          
+            if(confirm('您需要登录以后才能执行这个操作，现在要登录吗？')) window.location.href = '/login';
+          
+        }});
+        </script>
+      </div>
+</div>
+
+
+<script type="text/javascript">
+  dp.SyntaxHighlighter.HighlightAll('code', true, true);
+
+  $$('#main .blog_content pre[name=code]').each(function(pre, index){ // blog content
+    var post_id = 475274;
+    var location = window.location;
+    source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+    pre.writeAttribute('codeable_id', post_id);
+    pre.writeAttribute('codeable_type', "Blog");
+    pre.writeAttribute('source_url', source_url);
+    pre.writeAttribute('pre_index', index);
+    pre.writeAttribute('title', '用Gvim建立IDE编程环境 （Windows篇）');
+  });
+  $$('#main .blog_comment > div').each(function(comment){// comment
+    var post_id = comment.id.substr(2);
+    $$("#"+comment.id+" pre[name=code]").each(function(pre, index){
+      var location = window.location;
+      source_url = location.protocol + "//" + location.host + location.pathname + location.search;
+      source_url += "#" + comment.id;
+      pre.writeAttribute('codeable_id', post_id);
+      pre.writeAttribute('codeable_type', "Post");
+      pre.writeAttribute('source_url', source_url);
+      pre.writeAttribute('pre_index', index);
+      pre.writeAttribute('title', '用Gvim建立IDE编程环境 （Windows篇）');
+    });
+  });
+  code_favorites_init();
+
+  fix_image_size($$('div.blog_content img'), 700);
+  function quote_comment(id) {
+    new Ajax.Request('/editor/quote', {
+      parameters: {'id':id, 'type':'BlogComment'},
+      onSuccess:function(response){editor.bbcode_editor.textarea.insertAfterSelection(response.responseText);
+        Element.scrollTo(editor.bbcode_editor.textarea.element);}
+    });
+  }
+
+  new WeiboShare({share_buttons: $('share_weibo'), img_scope: $('blog_content')});
+</script>
+
+
+
+
+        </div>
+
+        <div id="local">
+          <div class="local_top"></div>
+          <div id="blog_owner">
+            <div id="blog_owner_logo"><a href="http://rokin.iteye.com/"><img alt="jy00509336的博客" class="logo" src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/user-logo.gif" title="jy00509336的博客: 敲代码"></a></div>
+            <div id="blog_owner_name">jy00509336</div>
+          </div>
+          <div id="blog_actions">
+            <ul>
+              <li>浏览: 39892 次</li>
+              <li>性别: <img alt="Icon_minigender_1" src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/icon_minigender_1.gif" title="男"></li>
+              <li>来自: 山西</li>
+              <li><img src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/offline.gif"></li>
+              <li>
+                <a href="http://rokin.iteye.com/blog/profile" class="profile">详细资料</a>
+                <a href="http://rokin.iteye.com/blog/guest_book" class="guest_book">留言簿</a>
+              </li>
+              
+            </ul>
+            <h5>搜索本博客</h5>
+            <form action="/blog/search" method="get">              <input class="text" id="query" name="query" style="margin-left: 10px; width: 110px;" type="text">
+              <input class="submit" value="搜索" type="submit">
+            </form>          </div>
+          <div id="user_visits" class="clearfix">
+            <h5>最近访客 <span style="font-weight:normal;font-size:12px;padding-left:30px;"><a href="http://rokin.iteye.com/blog/user_visits">&gt;&gt;更多访客</a></span></h5>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://greenpeople.iteye.com/" target="_blank"><img alt="greenpeople的博客" class="logo" src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/user-logo-thumb.gif" title="greenpeople的博客: "></a></div>
+                <div class="left"><a href="http://greenpeople.iteye.com/" target="_blank">greenpeople</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://langyong314.iteye.com/" target="_blank"><img alt="langyong314的博客" class="logo" src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/user-logo-thumb.gif" title="langyong314的博客: langyong314"></a></div>
+                <div class="left"><a href="http://langyong314.iteye.com/" target="_blank">langyong314</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://hackhl.iteye.com/" target="_blank"><img alt="hackhl的博客" class="logo" src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/user-logo-thumb.gif" title="hackhl的博客: "></a></div>
+                <div class="left"><a href="http://hackhl.iteye.com/" target="_blank">hackhl</a></div>
+              </div>
+            
+              <div class="user_visit">
+                <div class="logo"><a href="http://awuge.iteye.com/" target="_blank"><img alt="awuge的博客" class="logo" src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/user-logo-thumb.gif" title="awuge的博客: "></a></div>
+                <div class="left"><a href="http://awuge.iteye.com/" target="_blank">awuge</a></div>
+              </div>
+            
+          </div>
+                      <div id="blog_menu">
+              <h5>博客分类</h5>
+              <ul>
+                <li><a href="http://rokin.iteye.com/">全部博客 (68)</a></li>
+                
+                  <li><a href="http://rokin.iteye.com/category/73586">注意事项 (9)</a></li>
+                
+                  <li><a href="http://rokin.iteye.com/category/74090">万恶的浏览器们 (3)</a></li>
+                
+                  <li><a href="http://rokin.iteye.com/category/79138">数据库 (5)</a></li>
+                
+                  <li><a href="http://rokin.iteye.com/category/80478">代码 (42)</a></li>
+                
+                  <li><a href="http://rokin.iteye.com/category/80481">linux (5)</a></li>
+                
+                  <li><a href="http://rokin.iteye.com/category/164159">jquery (1)</a></li>
+                
+              </ul>
+            </div>
+            
+            <div id="guest_books">
+              <h5>我的留言簿 <span style="font-weight:normal;font-size:12px;padding-left:20px;"><a href="http://rokin.iteye.com/blog/guest_book">&gt;&gt;更多留言</a></span></h5>
+              <ul>
+                
+              </ul>
+            </div>
+            <div id="blog_others">
+              <h5>其他分类</h5>
+              <ul>
+                <li><a href="http://rokin.iteye.com/blog/favorite">我的收藏</a> (41)</li>
+                <li><a href="http://rokin.iteye.com/blog/code_favorite">我的代码</a> (0)</li>
+                                                  <li><a href="http://rokin.iteye.com/blog/news">我的新闻</a> (1) </li>
+                                <li><a href="http://rokin.iteye.com/blog/topic">我的论坛主题帖</a> (2)</li>
+                <li><a href="http://rokin.iteye.com/blog/post">我的所有论坛帖</a> (5)</li>
+                <li><a href="http://rokin.iteye.com/blog/article">我的精华良好帖</a> (0)</li>
+                              </ul>
+            </div>
+            <div id="recent_groups">
+              <h5>最近加入群组</h5>
+              <ul>
+                
+                  <li><a href="http://onlypython.group.iteye.com/">Python</a></li>
+                
+              </ul>
+            </div>
+            <div id="month_blogs">
+              <h5>存档</h5>
+              <ul>
+                
+                  <li><a href="http://rokin.iteye.com/blog/monthblog/2011-07">2011-07</a> (5)</li>
+                
+                  <li><a href="http://rokin.iteye.com/blog/monthblog/2011-06">2011-06</a> (2)</li>
+                
+                  <li><a href="http://rokin.iteye.com/blog/monthblog/2011-04">2011-04</a> (2)</li>
+                
+                <li><a href="http://rokin.iteye.com/blog/monthblog_more">更多存档...</a></li>
+              </ul>
+            </div>
+            
+            
+              <div id="comments_top">
+                <h5>评论排行榜</h5>
+                <ul>
+                  
+                    <li><a href="http://rokin.iteye.com/blog/858152" title="为JTextField添加Auto Completion功能">为JTextField添加Auto Completion功能</a></li>
+                  
+                </ul>
+              </div>
+            
+            <div id="rss">
+              <ul>
+                <li><a href="http://rokin.iteye.com/rss" target="_blank"><img alt="Rss" src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/rss.png"></a></li>
+                <li><a href="http://fusion.google.com/add?feedurl=http://rokin.iteye.com/rss" target="_blank"><img alt="Rss_google" src="%E7%94%A8Gvim%E5%BB%BA%E7%AB%8BIDE%E7%BC%96%E7%A8%8B%E7%8E%AF%E5%A2%83%20%EF%BC%88Windows%E7%AF%87%EF%BC%89_files/rss_google.gif"></a></li>
+              </ul>
+            </div>
+            <div class="local_bottom"></div>
+          
+        </div>
+      </div>
+
+      <div id="footer" class="clearfix">
+        <div id="copyright">
+          <hr>
+          声明：ITeye文章版权属于作者，受法律保护。没有作者书面许可不得转载。若作者同意转载，必须以超链接形式标明文章原始出处和作者。<br>
+          © 2003-2011 ITeye.com.   All rights reserved.  [ 京ICP证110151号 ]
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+  document.write("<img src='http://stat.iteye.com/?url="+ encodeURIComponent(document.location.href) + "&referrer=" + encodeURIComponent(document.referrer) + "&user_id=' width='0' height='0' />");
+</script>
+
+    
+  
+
+</body></html>
