@@ -1,2 +1,10 @@
 # vim swp file
 .*.sw?
+*.o
+*.log
+*~
+cscope.*
+tags
+lib*
+config.h
+/tools/*/*.exe

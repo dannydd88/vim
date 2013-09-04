@@ -1,0 +1,97 @@
+Cscope is a text screen based source browsing tool.  Although it is
+primarily designed to search C code (including lex and yacc files), it
+can also be used for C++ code.
+
+Using cscope, you can easily search for where symbols are used and
+defined.  Cscope is designed to answer questions like:
+
+        Where is this variable used?
+        What is the value of this preprocessor symbol?
+        Where is this function in the source files?
+        What functions call this function?
+        What functions are called by this function?
+        Where does the message "out of space" come from?
+        Where is this source file in the directory structure?
+        What files include this header file?
+
+It has been released by The Santa Cruz Operation, Inc as Open Source
+under the BSD license.  Please look at COPYING for a detailed
+description of the license.
+
+For instructions on how to build and install cscope, see the file,
+"INSTALL".
+
+One thing to be pointed out is that this is ancient Unix software
+predating much of today's security concerns.  While we do try to
+address safety issues as we learn about them, it must be said that
+this is in no way hardened or secure software.  It's designed to be
+used by developers, not administrators or anonymous users.
+
+Browse to http://cscope.sourceforge.net for more current information
+
+*****
+
+cscope在windows下使用mingw编译的方法
+
+
+编译好的cscope15.6-win32在这里下载：
+http://linux.chinaunix.net/bbs/attachment.php?aid=177425
+http://sourceforge.net/project/showfiles.php?group_id=196604
+ 
+作者： 刘凯 mslk.sa@gmail.com
+关键字：cscope.exe,cscope15.6.exe,cscope windows，cscope win32，cscope mingw，修改编译cscope
+摘要：使用mingw编译cscope win32 native的方法，本文以cscope最新版本15.6（20060930）为例。
+ 
+因为最近想看一个大项目的源代码，两年前就知道cscope是个比较适合的辅助工具，当时看到cscope15.5是2003年的版本，觉得好久不更新太老了就没有用，今天看到了新版本15.6（20060930）还算比较新，就决定试试它到底有多爽。
+在网上找了一下，发现windows下的版本都是很久以前的，就只好自己编译了。
+下面说说我编译的方法：
+一、下载安装gcc和一些必须的工具   
+  cscope.sf.net下载最新的cscope-15.6.tar.gz。  
+    www.mingw.org 上的gcc编译器工具集、bash3.1都要搞下来。
+    gunwin32.sf.net 上的bison，flex，m4，make，PcRe，PdCurses，……
+二、修改源代码
+在cmd窗口中进入cscope-15.6的目录执行：
+1、 sh configure –build=mingw32
+需要等几分钟，在最后能看到信息：config.status: creating src/Makefile就行了 
+1、 进入src目录
+2、 打开编辑global.h，在文件最后#endif /* CSCOPE_GLOBAL_H */的前面，加上两行：
+#define __DJGPP__
+#define __MSDOS__
+3、 打开编辑exec.c，注释掉41行：//#include <sys/wait.h>
+4、 打开编辑mypopen.c，注释掉37行：//#include <sys/wait.h>
+注释掉84、85行：
+//if(fd != -1 && (fcntl(fd, F_SETFD, CLOSE_ON_EXEC) != -1))
+//return(fd);
+5、 打开编辑find.c，注释掉1160行：//(void) sleep(3);
+6、 打开编辑main.c，
+修改360行orig_umask = umask(S_IRWXG|S_IRWXO);为：
+orig_umask = umask(S_IRWXU);
+修改363行if(mkdir(tempdirpv,S_IRWXU)) {为：
+     if(mkdir(tempdirpv)) {
+注释掉378行：//signal(SIGQUIT, myexit);
+注释掉381行：//signal(SIGHUP, myexit);
+注释掉404行：//signal(SIGPIPE, SIG_IGN);/* | command can cause pipe signal */
+修改895行if (sig == SIGQUIT) {为：
+     if (sig == SIGTERM ||
+    sig == SIGABRT ||
+    sig == SIGBREAK){
+修改175行fprintf(stderr, "%s: version %d%s/n", argv0,为：
+        fprintf(stderr, "%s: version %d%s./tCompiled by MSLK/n", argv0,
+7、 打开编辑Makefile，
+修改133行CURSES_LIBS = -lcurses为：
+     CURSES_LIBS = -lpdcurses –lpcre
+三、编译cscope，在cmd窗口中进入cscope-15.6/src的目录执行：
+make –k
+    cscope –V 瞧一下自己编译的最新版本，很爽吧。 
+四、后记
+cscope配合emacs试了一下，要把cscope-15.6/contrib/xcscope/xcscope.el放入emacs/site-lisp中， /M+x: cscope-find-this-symbol确实挺不错的，   比ctags的功能强多了，特别是多处出现时找着比/M+,、/M+.方便多了。
+    cscope –h 可以看看帮助学习学习。
+
+ 
+
+
+编译好的cscope15.6-win32在这里下载：
+http://linux.chinaunix.net/bbs/attachment.php?aid=177425
+
+http://sourceforge.net/project/showfiles.php?group_id=196604
+

@@ -1,0 +1,13 @@
+
+project regex
+: requirements
+    <include>.
+    <include>src
+    <define>HAVE_CONFIG_H
+    <define>USE_REGEX_STATIC
+;
+
+lib regex :
+src/regex.c : <link>static ;
+
+install build : regex : <location>. ;
