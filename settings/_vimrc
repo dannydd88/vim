@@ -32,7 +32,8 @@ language messages zh_CN.utf-8
 
 
 " File type related
-filetype plugin indent on
+"filetype plugin indent on
+filetype plugin on
 
 
 " Display related
