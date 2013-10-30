@@ -1,41 +1,23 @@
+
 set nocompatible
-set nu!
-colorscheme torte
 
-"syntax enable
-if has("syntax")
-    syntax on
-endif
 
-"文件编码相关
-set fileformat=unix
-
-"搜索相关
-set hlsearch 
-set incsearch
-
-"代码风格统一
-set expandtab
+" Tab relatived
 set tabstop=4
 set shiftwidth=4
-set cindent
 set softtabstop=4
-set backspace=2
+set expandtab
+set ambiwidth=double
 
-filetype plugin on
 
-"状态栏
-set ru
+" Editing related
+set backspace=indent,eol,start
 
-"启动窗口位置&大小
-winpos 170 60
-set lines=50 columns=170
 
-""""""""""""""""""""""""""""""""
-"解决编码问题
-""""""""""""""""""""""""""""""""
-set langmenu=zh_CN.utf-8
+" Encoding related
+set fileformat=unix
 set encoding=utf-8
+set langmenu=zh_CN.utf-8
 set fileencodings=utf-8,chinese,latin-1
 if has("win32")
     set fileencoding=chinese
@@ -48,35 +30,90 @@ source $VIMRUNTIME/menu.vim
 "解决console输出乱码
 language messages zh_CN.utf-8
 
-"换字体
-set guifont=Bitstream_Vera_Sans_Mono:h10:cANSI
-set gfw=Yahei_Mono:h10.5:cGB2312
 
+" File type related
+filetype plugin indent on
+
+
+" Display related
+set ru
+set nu
+set showcmd
+set hlsearch 
+set incsearch
+colorscheme torte
+syntax on
+
+
+" Indent related
+set cindent
+set cinoptions=t0N-s(0j1
+
+
+"启动窗口位置&大小
+winpos 170 60
+set lines=50 columns=170
+
+
+"=============================================================================
+" Platform dependent settings
+"=============================================================================
+if (has("win32"))
+    if (has("gui_running"))
+        set guifont=Bitstream_Vera_Sans_Mono:h10:cANSI
+        set gfw=Yahei_Mono:h10.5:cGB2312
+    endif
+else
+    if (has("gui_running"))
+        set guifont=Bitstream\ Vera\ Sans\ Mono\ 10
+    endif
+endif
+
+
+"=============================================================================
+" Plugin settings
+"=============================================================================
 "a.vim 快速切换头和源文件
 nnoremap <silent> <F12> :A<CR>
+
 "grep.vim 工程中快速查找
 nnoremap <silent> <F3> :Grep<CR>
 nnoremap <silent> <F2> :Rgrep<CR>
-"grep path (need mingw)
+if (has("win32"))
+    let Grep_Path =         'C:\MinGW\msys\1.0\bin\grep.exe'
+    let Fgrep_Path =        'C:\MinGW\msys\1.0\bin\fgrep.exe'
+    let Egrep_Path =        'C:\MinGW\msys\1.0\bin\egrep.exe'
+    let Agrep_Path =        'C:\MinGW\msys\1.0\bin\agrep.exe'
+    let Grep_Find_Path =    'C:\MinGW\msys\1.0\bin\find.exe'
+    let Grep_Xargs_Path =   'C:\MinGW\msys\1.0\bin\xargs.exe'
+else
+    "grep path (need mingw)
+    let Grep_Path =         '/bin/grep'
+    let Fgrep_Path =        '/bin/fgrep'
+    let Egrep_Path =        '/bin/egrep'
+    let Agrep_Path =        '/usr/bin/agrep'
+    let Grep_Find_Path =    '/usr/bin/find'
+    let Grep_Xargs_Path =   '/usr/bin/xargs'
+endif
 let Grep_Skip_Files = '*.bak *~'
-let Grep_Path = 'C:\MinGW\msys\1.0\bin\grep.exe'
-let Fgrep_Path = 'C:\MinGW\msys\1.0\bin\fgrep.exe'
-let Egrep_Path = 'C:\MinGW\msys\1.0\bin\egrep.exe'
-let Agrep_Path = 'C:\MinGW\msys\1.0\bin\agrep.exe'
-let Grep_Find_Path = 'C:\MinGW\msys\1.0\bin\find.exe'
-let Grep_Xargs_Path = 'C:\MinGW\msys\1.0\bin\xargs.exe'
 let Grep_Default_Filelist = '*.c *.cpp *.h'
 let Grep_Skip_Dirs = '.svn .git'
 
 "cscopes使用
 function UpdateCscope()
     cs kill 0
-    "silent! execute "!find -name '*.c' -o -name '*.cpp' -o -name '*.cc' -o -name '*.h' -o -name '*.hpp' -o -name '*.java' -type f > tmplist"
-    silent! execute "!dir *.cpp *.h *.hpp *.c *.java *.cc /s /B > tmplist"
+    if (has("win32"))
+        silent! execute "!dir *.cpp *.h *.hpp *.c *.java *.cc /s /B > tmplist"
+    else
+        silent! execute "!find -name '*.c' -o -name '*.cpp' -o -name '*.cc' -o -name '*.h' -o -name '*.hpp' -o -name '*.java' -type f > tmplist"
+    endif
     silent! execute "!cscope -bqk -i tmplist"
     silent! execute "!ctags -R -L tmplist"
-    "silent! execute "!rm -f tmplist"
-    silent! execute "!del tmplist"
+    if (has("win32"))
+        silent! execute "!del tmplist"
+    else
+        silent! execute "!rm -f tmplist"
+    endif
     cs add cscope.out
 endfunction
 map <C-F10>c :call UpdateCscope() <CR>
