@@ -39,6 +39,7 @@
 #include <windows.h>
 #else
 #include <dirent.h>
+#include <iconv.h>
 #include <sys/stat.h>
 #ifdef __VMS
 #include <unixlib.h>
@@ -60,8 +61,7 @@
 int _CRT_glob = 0;
 #endif
 
-namespace astyle
-{
+namespace astyle {
 
 #ifdef _WIN32
 char g_fileSeparator = '\\';
@@ -84,7 +84,7 @@ jobject   g_obj;
 jmethodID g_mid;
 #endif
 
-const char* g_version = "2.03";
+const char*    g_version  =  "2.04";
 
 //-----------------------------------------------------------------------------
 // ASStreamIterator class
@@ -229,7 +229,7 @@ string ASStreamIterator<T>::peekNextLine()
 	// remove end-of-line characters
 	if (!inStream->eof())
 	{
-		if ((peekCh == '\n' || peekCh == '\r') && peekCh != ch)  /////////////  changed  //////////
+		if ((peekCh == '\n' || peekCh == '\r') && peekCh != ch)
 			inStream->get();
 	}
 
@@ -282,11 +282,12 @@ bool ASStreamIterator<T>::getLineEndChange(int lineEndFormat) const
 	return lineEndChange;
 }
 
-#ifndef ASTYLE_LIB
 //-----------------------------------------------------------------------------
 // ASConsole class
 // main function will be included only in the console build
 //-----------------------------------------------------------------------------
+
+#ifndef ASTYLE_LIB
 
 // rewrite a stringstream converting the line ends
 void ASConsole::convertLineEnds(ostringstream &out, int lineEnd)
@@ -299,7 +300,7 @@ void ASConsole::convertLineEnds(ostringstream &out, int lineEnd)
 	{
 		if (inStr[pos] == '\r')
 		{
-			if (inStr[pos+ 1] == '\n')
+			if (inStr[pos + 1] == '\n')
 			{
 				// CRLF
 				if (lineEnd == LINEEND_CR)
@@ -310,14 +311,14 @@ void ASConsole::convertLineEnds(ostringstream &out, int lineEnd)
 				}
 				else if (lineEnd == LINEEND_LF)
 				{
-					outStr += inStr[pos+1];		// Delete the CR
+					outStr += inStr[pos + 1];		// Delete the CR
 					pos++;
 					continue;
 				}
 				else
 				{
 					outStr += inStr[pos];		// Do not change
-					outStr += inStr[pos+1];
+					outStr += inStr[pos + 1];
 					pos++;
 					continue;
 				}
@@ -425,40 +426,24 @@ void ASConsole::error(const char* why, const char* what) const
  */
 void ASConsole::formatCinToCout()
 {
-	verifyCinPeek();
-#ifdef _WIN32
-	// Assure that redirected cin is all Windows line ends.
-	// TODO: The following can be removed when tellg() is removed.
-	// Windows line ends must be used on the input. If not, a problem occurs
-	// when tellg() statements are used. The tellg() will be out of sequence
-	// with the get() statements. The following file conversion could be
-	// eliminated if the tellg() statements were removed.
-	istream* streamIn = &cin;
-	ostringstream out;
-	const int bufSize = 65536;	// 64 KB
-	char* buf = new(nothrow) char[bufSize];
-	if (!buf)
-		error("Cannot allocate memory for input file", "");
-	while (!streamIn->eof())
+	// Using cin.tellg() causes problems with both Windows and Linux.
+	// The Windows problem occurs when the input is not Windows line-ends.
+	// The tellg() will be out of sequence with the get() statements.
+	// The Linux cin.tellg() will return -1 (invalid).
+	// Copying the input sequentially to a stringstream before
+	// formatting solves the problem for both.
+	istream* inStream = &cin;
+	stringstream outStream;
+	char ch;
+	while (!inStream->eof())
 	{
-		streamIn->read(buf, bufSize);
-		out.write(buf, streamIn->gcount());;
+		inStream->get(ch);
+		outStream.put(ch);
 	}
-	delete [] buf;
-	buf = NULL;
-	convertLineEnds(out, LINEEND_WINDOWS);
-	stringstream in(out.str().c_str());
-	ASStreamIterator<stringstream> streamIterator(&in); // create iterator for converted input
-
-	// Must specify LF line ends for Windows. This will output CRLF on the terminal.
-	// Specifying CRLF line ends will output CRCRLF (2 CRs) on the terminal.
-	// There is no way I know to change the line ends on Windows redirection.
-	LineEndFormat lineEndFormat = LINEEND_LF;
-#else
-	// Linux can handle any line end.
-	ASStreamIterator<istream> streamIterator(&cin);     // create iterator for cin
+	ASStreamIterator<stringstream> streamIterator(&outStream);
+	// Windows pipe or redirection always outputs Windows line-ends.
+	// Linux pipe or redirection will output any line end.
 	LineEndFormat lineEndFormat = formatter.getLineEndFormat();
-#endif  //  _WIN32
 	initializeOutputEOL(lineEndFormat);
 	formatter.init(&streamIterator);
 
@@ -482,21 +467,6 @@ void ASConsole::formatCinToCout()
 		}
 	}
 	cout.flush();
-}
-
-/**
- * Verify that tellg() works with cin.
- * This will fail if cin is piped to AStyle "cat txt.cpp | ./astyled".
- * But is OK for redirection "./astyled < txt.cpp".
- */
-void ASConsole::verifyCinPeek() const
-{
-	int currPos = static_cast<int>(cin.tellg());
-	if (currPos == -1)
-	{
-		(*_err) << _("Cannot process the input stream") << endl;
-		error();
-	}
 }
 
 /**
@@ -614,9 +584,7 @@ vector<string> ASConsole::getArgvOptions(int argc, char** argv) const
 
 // for unit testing
 vector<bool> ASConsole::getExcludeHitsVector()
-{
-	return excludeHitsVector;
-}
+{ return excludeHitsVector; }
 
 // for unit testing
 vector<string> ASConsole::getExcludeVector()
@@ -634,59 +602,66 @@ vector<string> ASConsole::getFileNameVector()
 vector<string> ASConsole::getFileOptionsVector()
 { return fileOptionsVector; }
 
-int ASConsole::getFilesUnchanged()
-{ return filesUnchanged; }
-
+// for unit testing
 int ASConsole::getFilesFormatted()
 { return filesFormatted; }
 
+// for unit testing
 bool ASConsole::getIgnoreExcludeErrors()
 { return ignoreExcludeErrors; }
 
+// for unit testing
 bool ASConsole::getIgnoreExcludeErrorsDisplay()
 { return ignoreExcludeErrorsDisplay; }
 
+// for unit testing
 bool ASConsole::getIsFormattedOnly()
 { return isFormattedOnly; }
 
+// for unit testing
 string ASConsole::getLanguageID() const
 { return localizer.getLanguageID(); }
 
+// for unit testing
 bool ASConsole::getIsQuiet()
 { return isQuiet; }
 
+// for unit testing
 bool ASConsole::getIsRecursive()
 { return isRecursive; }
 
+// for unit testing
 bool ASConsole::getIsVerbose()
 { return isVerbose; }
 
+// for unit testing
 bool ASConsole::getLineEndsMixed()
 { return lineEndsMixed; }
 
+// for unit testing
 bool ASConsole::getNoBackup()
 { return noBackup; }
 
+// for unit testing
 string ASConsole::getOptionsFileName()
 { return optionsFileName; }
-
-bool ASConsole::getOptionsFileRequired()
-{ return optionsFileRequired; }
 
 // for unit testing
 vector<string> ASConsole::getOptionsVector()
 { return optionsVector; }
 
+// for unit testing
 string ASConsole::getOrigSuffix()
 { return origSuffix; }
+
+// for unit testing
+bool ASConsole::getPreserveDate()
+{ return preserveDate; }
 
 string ASConsole::getParam(const string &arg, const char* op)
 {
 	return arg.substr(strlen(op));
 }
-
-bool ASConsole::getPreserveDate()
-{ return preserveDate; }
 
 // initialize output end of line
 void ASConsole::initializeOutputEOL(LineEndFormat lineEndFormat)
@@ -733,7 +708,7 @@ FileEncoding ASConsole::readFile(const string &fileName_, stringstream &in) cons
 		if (encoding == UTF_16LE || encoding == UTF_16BE)
 		{
 			// convert utf-16 to utf-8
-			size_t utf8Size = Utf8Length(data, dataSize, encoding);
+			size_t utf8Size = Utf8LengthFromUtf16(data, dataSize, encoding);
 			char* utf8Out = new(nothrow) char[utf8Size];
 			if (!utf8Out)
 				error("Cannot allocate memory for utf-8 conversion", fileName_.c_str());
@@ -778,9 +753,6 @@ void ASConsole::setNoBackup(bool state)
 
 void ASConsole::setOptionsFileName(string name)
 { optionsFileName = name; }
-
-void ASConsole::setOptionsFileRequired(bool state)
-{ optionsFileRequired = state; }
 
 void ASConsole::setOrigSuffix(string suffix)
 { origSuffix = suffix; }
@@ -1090,7 +1062,7 @@ void ASConsole::getFileNames(const string &directory, const string &wildcard)
  * This formats positive integers only, no float.
  *
  * @param num		The number to be formatted.
- * @param			For compatability with the Windows function.
+ * @param			For compatibility with the Windows function.
  * @return			The formatted number.
  */
 string ASConsole::getNumberFormat(int num, size_t) const
@@ -1152,7 +1124,7 @@ string ASConsole::getNumberFormat(int num, const char* groupingArg, const char* 
 		number.erase(i);
 		// update grouping
 		if (groupingArg[ig] != '\0'
-		        && groupingArg[ig+1] != '\0')
+		        && groupingArg[ig + 1] != '\0')
 			grouping = groupingArg[++ig];
 	}
 	return formattedNum;
@@ -1179,7 +1151,7 @@ void ASConsole::getFilePaths(string &filePath)
 	else
 	{
 		targetDirectory = filePath.substr(0, separator);
-		targetFilename  = filePath.substr(separator+1);
+		targetFilename  = filePath.substr(separator + 1);
 		mainDirectoryLength = targetDirectory.length() + 1;    // +1 includes trailing separator
 	}
 
@@ -1324,9 +1296,9 @@ bool ASConsole::isPathExclued(const string &subPath)
 		if (!g_isCaseSensitive)
 		{
 			// make it case insensitive for Windows
-			for (size_t j=0; j<compare.length(); j++)
+			for (size_t j = 0; j < compare.length(); j++)
 				compare[j] = (char)tolower(compare[j]);
-			for (size_t j=0; j<exclude.length(); j++)
+			for (size_t j = 0; j < exclude.length(); j++)
 				exclude[j] = (char)tolower(exclude[j]);
 		}
 		// compare sub directory to exclude data - must check them all
@@ -1343,9 +1315,9 @@ bool ASConsole::isPathExclued(const string &subPath)
 void ASConsole::printHelp() const
 {
 	(*_err) << endl;
-	(*_err) << "                            Artistic Style " << g_version << endl;
-	(*_err) << "                         Maintained by: Jim Pattee\n";
-	(*_err) << "                       Original Author: Tal Davidson\n";
+	(*_err) << "                     Artistic Style " << g_version << endl;
+	(*_err) << "                     Maintained by: Jim Pattee\n";
+	(*_err) << "                     Original Author: Tal Davidson\n";
 	(*_err) << endl;
 	(*_err) << "Usage  :  astyle [options] Source1.cpp Source2.cpp  [...]\n";
 	(*_err) << "          astyle [options] < Original > Beautified\n";
@@ -1362,13 +1334,13 @@ void ASConsole::printHelp() const
 	(*_err) << "statements, a minimum indentation of eight spaces inside conditional\n";
 	(*_err) << "statements, and NO formatting options.\n";
 	(*_err) << endl;
-	(*_err) << "Option's Format:\n";
-	(*_err) << "----------------\n";
+	(*_err) << "Option Format:\n";
+	(*_err) << "--------------\n";
 	(*_err) << "    Long options (starting with '--') must be written one at a time.\n";
 	(*_err) << "    Short options (starting with '-') may be appended together.\n";
 	(*_err) << "    Thus, -bps4 is the same as -b -p -s4.\n";
 	(*_err) << endl;
-	(*_err) << "Default options file:\n";
+	(*_err) << "Default Option File:\n";
 	(*_err) << "---------------------\n";
 	(*_err) << "    Artistic Style looks for a default options file in the\n";
 	(*_err) << "    following order:\n";
@@ -1385,8 +1357,8 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "Bracket Style Options:\n";
 	(*_err) << "----------------------\n";
-	(*_err) << "    --style=allman  OR  --style=ansi  OR  --style=bsd\n";
-	(*_err) << "	    OR  --style=break  OR  -A1\n";
+	(*_err) << "    --style=allman  OR  --style=ansi   OR  --style=bsd\n";
+	(*_err) << "                    OR  --style=break  OR  -A1\n";
 	(*_err) << "    Allman style formatting/indenting.\n";
 	(*_err) << "    Broken brackets.\n";
 	(*_err) << endl;
@@ -1416,7 +1388,7 @@ void ASConsole::printHelp() const
 	(*_err) << "    GNU style formatting/indenting.\n";
 	(*_err) << "    Broken brackets, indented blocks.\n";
 	(*_err) << endl;
-	(*_err) << "    --style=linux  OR  -A8\n";
+	(*_err) << "    --style=linux  OR  --style=knf  OR  -A8\n";
 	(*_err) << "    Linux style formatting/indenting.\n";
 	(*_err) << "    Linux brackets, minimum conditional indent is one-half indent.\n";
 	(*_err) << endl;
@@ -1427,6 +1399,10 @@ void ASConsole::printHelp() const
 	(*_err) << "    --style=1tbs  OR  --style=otbs  OR  -A10\n";
 	(*_err) << "    One True Brace Style formatting/indenting.\n";
 	(*_err) << "    Linux brackets, add brackets to all conditionals.\n";
+	(*_err) << endl;
+	(*_err) << "    --style=google  OR  -A14\n";
+	(*_err) << "    Google style formatting/indenting.\n";
+	(*_err) << "    Attached brackets, indented class modifiers.\n";
 	(*_err) << endl;
 	(*_err) << "    --style=pico  OR  -A11\n";
 	(*_err) << "    Pico style formatting/indenting.\n";
@@ -1463,12 +1439,29 @@ void ASConsole::printHelp() const
 	(*_err) << "    from the indent length. This may cause the indentation to be\n";
 	(*_err) << "    a mix of both spaces and tabs. This option sets the tab length.\n";
 	(*_err) << endl;
-	(*_err) << "Indentation options:\n";
+	(*_err) << "Bracket Modify Options:\n";
+	(*_err) << "-------------------------\n";
+	(*_err) << "    --attach-namespaces  OR  -xn\n";
+	(*_err) << "    Attach brackets to a namespace statement.\n";
+	(*_err) << endl;
+	(*_err) << "    --attach-classes  OR  -xc\n";
+	(*_err) << "    Attach brackets to a class statement.\n";
+	(*_err) << endl;
+	(*_err) << "    --attach-inlines  OR  -xl\n";
+	(*_err) << "    Attach brackets to class inline function definitions.\n";
+	(*_err) << endl;
+	(*_err) << "    --attach-extern-c  OR  -xk\n";
+	(*_err) << "    Attach brackets to an extern \"C\" statement.\n";
+	(*_err) << endl;
+	(*_err) << "Indentation Options:\n";
 	(*_err) << "--------------------\n";
 	(*_err) << "    --indent-classes  OR  -C\n";
-	(*_err) << "    Indent 'class' blocks, so that the inner 'public:',\n";
-	(*_err) << "    'protected:' and 'private: headers are indented in\n";
-	(*_err) << "    relation to the class block.\n";
+	(*_err) << "    Indent 'class' blocks so that the entire block is indented.\n";
+	(*_err) << endl;
+	(*_err) << "    --indent-modifiers  OR  -xG\n";
+	(*_err) << "    Indent 'class' access modifiers, 'public:', 'protected:' or\n";
+	(*_err) << "    'private:', one half indent. The rest of the class is not\n";
+	(*_err) << "    indented. \n";
 	(*_err) << endl;
 	(*_err) << "    --indent-switches  OR  -S\n";
 	(*_err) << "    Indent 'switch' blocks, so that the inner 'case XXX:'\n";
@@ -1486,8 +1479,13 @@ void ASConsole::printHelp() const
 	(*_err) << "    the current indentation level, rather than being\n";
 	(*_err) << "    flushed completely to the left (which is the default).\n";
 	(*_err) << endl;
-	(*_err) << "    --indent-preprocessor  OR  -w\n";
-	(*_err) << "    Indent multi-line #define statements.\n";
+	(*_err) << "    --indent-preproc-define  OR  -w\n";
+	(*_err) << "    --indent-preprocessor has been depreciated.\n";
+	(*_err) << "    Indent multi-line preprocessor #define statements.\n";
+	(*_err) << endl;
+	(*_err) << "    --indent-preproc-cond  OR  -xw\n";
+	(*_err) << "    Indent preprocessor conditional statements #if/#else/#endif\n";
+	(*_err) << "    to the same level as the source code.\n";
 	(*_err) << endl;
 	(*_err) << "    --indent-col1-comments  OR  -Y\n";
 	(*_err) << "    Indent line comments that start in column one.\n";
@@ -1508,8 +1506,8 @@ void ASConsole::printHelp() const
 	(*_err) << "    The valid values are 40 thru 120.\n";
 	(*_err) << "    The default value is 40.\n";
 	(*_err) << endl;
-	(*_err) << "Padding options:\n";
-	(*_err) << "--------------------\n";
+	(*_err) << "Padding Options:\n";
+	(*_err) << "----------------\n";
 	(*_err) << "    --break-blocks  OR  -f\n";
 	(*_err) << "    Insert empty lines around unrelated blocks, labels, classes, ...\n";
 	(*_err) << endl;
@@ -1564,12 +1562,12 @@ void ASConsole::printHelp() const
 	(*_err) << "    the operator type (left), middle, or operator name (right).\n";
 	(*_err) << "    If not set, follow pointer alignment.\n";
 	(*_err) << endl;
-	(*_err) << "Formatting options:\n";
+	(*_err) << "Formatting Options:\n";
 	(*_err) << "-------------------\n";
 	(*_err) << "    --break-closing-brackets  OR  -y\n";
 	(*_err) << "    Break brackets before closing headers (e.g. 'else', 'catch', ...).\n";
-	(*_err) << "    Use with --brackets=attach, --brackets=linux, \n";
-	(*_err) << "    or --brackets=stroustrup.\n";
+	(*_err) << "    Use with --style=java, --style=kr, --style=stroustrup,\n";
+	(*_err) << "    --style=linux, or --style=1tbs.\n";
 	(*_err) << endl;
 	(*_err) << "    --break-elseifs  OR  -e\n";
 	(*_err) << "    Break 'else if()' statements into two different lines.\n";
@@ -1580,6 +1578,9 @@ void ASConsole::printHelp() const
 	(*_err) << "    --add-one-line-brackets  OR  -J\n";
 	(*_err) << "    Add one line brackets to unbracketed one line conditional\n";
 	(*_err) << "    statements.\n";
+	(*_err) << endl;
+	(*_err) << "    --remove-brackets  OR  -xj\n";
+	(*_err) << "    Remove brackets from a bracketed one line conditional statements.\n";
 	(*_err) << endl;
 	(*_err) << "    --keep-one-line-blocks  OR  -O\n";
 	(*_err) << "    Don't break blocks residing completely on one line.\n";
@@ -1593,6 +1594,10 @@ void ASConsole::printHelp() const
 	(*_err) << endl;
 	(*_err) << "    --close-templates  OR  -xy\n";
 	(*_err) << "    Close ending angle brackets on template definitions.\n";
+	(*_err) << endl;
+	(*_err) << "    --remove-comment-prefix  OR  -xp\n";
+	(*_err) << "    Remove the leading '*' prefix on multi-line comments and\n";
+	(*_err) << "    indent the comment text one indent.\n";
 	(*_err) << endl;
 	(*_err) << "    --max-code-length=#    OR  -xC#\n";
 	(*_err) << "    --break-after-logical  OR  -xL\n";
@@ -1612,7 +1617,27 @@ void ASConsole::printHelp() const
 	(*_err) << "    --mode=cs\n";
 	(*_err) << "    Indent a C# source file.\n";
 	(*_err) << endl;
-	(*_err) << "Other options:\n";
+	(*_err) << "Objective-C Options:\n";
+	(*_err) << "--------------------\n";
+	(*_err) << "    --align-method-colon  OR  -xM\n";
+	(*_err) << "    Align the colons in an Objective-C method definition.\n";
+	(*_err) << endl;
+	(*_err) << "    --pad-method-prefix  OR  -xQ\n";
+	(*_err) << "    Insert space padding after the '-' or '+' Objective-C\n";
+	(*_err) << "    method prefix.\n";
+	(*_err) << endl;
+	(*_err) << "    --unpad-method-prefix  OR  -xR\n";
+	(*_err) << "    Remove all space padding after the '-' or '+' Objective-C\n";
+	(*_err) << "    method prefix.\n";
+	(*_err) << endl;
+	(*_err) << "    --pad-method-colon=none    OR  -xP\n";
+	(*_err) << "    --pad-method-colon=all     OR  -xP1\n";
+	(*_err) << "    --pad-method-colon=after   OR  -xP2\n";
+	(*_err) << "    --pad-method-colon=before  OR  -xP3\n";
+	(*_err) << "    Add or remove space padding before or after the colons in an\n";
+	(*_err) << "    Objective-C method call.\n";
+	(*_err) << endl;
+	(*_err) << "Other Options:\n";
 	(*_err) << "--------------\n";
 	(*_err) << "    --suffix=####\n";
 	(*_err) << "    Append the suffix #### instead of '.orig' to original filename.\n";
@@ -1626,11 +1651,11 @@ void ASConsole::printHelp() const
 	(*_err) << "    --exclude=####\n";
 	(*_err) << "    Specify a file or directory #### to be excluded from processing.\n";
 	(*_err) << endl;
-	(*_err) << "    ignore-exclude-errors  OR  -i\n";
+	(*_err) << "    --ignore-exclude-errors  OR  -i\n";
 	(*_err) << "    Allow processing to continue if there are errors in the exclude=###\n";
 	(*_err) << "    options. It will display the unmatched excludes.\n";
 	(*_err) << endl;
-	(*_err) << "    ignore-exclude-errors-x  OR  -xi\n";
+	(*_err) << "    --ignore-exclude-errors-x  OR  -xi\n";
 	(*_err) << "    Allow processing to continue if there are errors in the exclude=###\n";
 	(*_err) << "    options. It will NOT display the unmatched excludes.\n";
 	(*_err) << endl;
@@ -1639,13 +1664,15 @@ void ASConsole::printHelp() const
 	(*_err) << "    to standard-error.\n";
 	(*_err) << endl;
 	(*_err) << "    --preserve-date  OR  -Z\n";
-	(*_err) << "    The date and time modified will not be changed in the formatted file.\n";
+	(*_err) << "    Preserve the original file's date and time modified. The time\n";
+	(*_err) << "     modified will be changed a few micro seconds to force a compile.\n";
 	(*_err) << endl;
 	(*_err) << "    --verbose  OR  -v\n";
 	(*_err) << "    Verbose mode. Extra informational messages will be displayed.\n";
 	(*_err) << endl;
 	(*_err) << "    --formatted  OR  -Q\n";
-	(*_err) << "    Formatted display mode. Display only the files that have been formatted.\n";
+	(*_err) << "    Formatted display mode. Display only the files that have been\n";
+	(*_err) << "    formatted.\n";
 	(*_err) << endl;
 	(*_err) << "    --quiet  OR  -q\n";
 	(*_err) << "    Quiet mode. Suppress all output except error messages.\n";
@@ -1870,7 +1897,7 @@ void ASConsole::standardizePath(string &path, bool removeBeginningSeparator /*fa
 	// If we are on a VMS system, translate VMS style filenames to unix
 	// style.
 	fab = cc$rms_fab;
-	fab.fab$l_fna = (char*)-1;
+	fab.fab$l_fna = (char*) - 1;
 	fab.fab$b_fns = 0;
 	fab.fab$l_naml = &naml;
 	naml = cc$rms_naml;
@@ -2046,7 +2073,7 @@ void ASConsole::updateExcludeVector(string suffixParam)
 //
 // Compute the length of an output utf-8 file given a utf-16 file.
 // Input tlen is the size in BYTES (not wchar_t).
-size_t ASConsole::Utf8Length(const char* data, size_t tlen, FileEncoding encoding) const
+size_t ASConsole::Utf8LengthFromUtf16(const char* data, size_t tlen, FileEncoding encoding) const
 {
 	enum { SURROGATE_LEAD_FIRST = 0xD800 };
 	enum { SURROGATE_TRAIL_LAST = 0xDFFF };
@@ -2082,6 +2109,8 @@ size_t ASConsole::Utf8Length(const char* data, size_t tlen, FileEncoding encodin
 // Adapted from SciTE Utf8_16.cxx.
 // Copyright (C) 2002 Scott Kirkwood.
 // Modified for Artistic Style by Jim Pattee.
+//
+// Convert a utf-8 file to utf-16.
 size_t ASConsole::Utf8ToUtf16(char* utf8In, size_t inLen, FileEncoding encoding, char* utf16Out) const
 {
 	typedef unsigned short utf16;	// 16 bits
@@ -2100,7 +2129,7 @@ size_t ASConsole::Utf8ToUtf16(char* utf8In, size_t inLen, FileEncoding encoding,
 	const utf16* pCurStart = pCur;
 	eState eState = eStart;
 
-	// the BOM will automaticallt be converted to utf-16
+	// the BOM will automatically be converted to utf-16
 	while (pRead < pEnd)
 	{
 		switch (eState)
@@ -2174,7 +2203,7 @@ size_t ASConsole::Utf8ToUtf16(char* utf8In, size_t inLen, FileEncoding encoding,
 //
 // Compute the length of an output utf-16 file given a utf-8 file.
 // Return value is the size in BYTES (not wchar_t).
-size_t ASConsole::Utf16Length(const char* data, size_t len) const
+size_t ASConsole::Utf16LengthFromUtf8(const char* data, size_t len) const
 {
 	size_t ulen = 0;
 	size_t charLen;
@@ -2202,6 +2231,8 @@ size_t ASConsole::Utf16Length(const char* data, size_t len) const
 // Adapted from SciTE Utf8_16.cxx.
 // Copyright (C) 2002 Scott Kirkwood.
 // Modified for Artistic Style by Jim Pattee.
+//
+// Convert a utf-16 file to utf-8.
 size_t ASConsole::Utf16ToUtf8(char* utf16In, size_t inLen, FileEncoding encoding,
                               bool firstBlock, char* utf8Out) const
 {
@@ -2224,7 +2255,7 @@ size_t ASConsole::Utf16ToUtf8(char* utf16In, size_t inLen, FileEncoding encoding
 	if (firstBlock)
 		eState = eStart;
 
-	// the BOM will automaticallt be converted to utf-8
+	// the BOM will automatically be converted to utf-8
 	while (pRead < pEnd)
 	{
 		switch (eState)
@@ -2351,7 +2382,7 @@ int ASConsole::wildcmp(const char* wild, const char* data) const
 				return 1;
 			}
 			mp = wild;
-			cp = data+1;
+			cp = data + 1;
 		}
 		else
 		{
@@ -2403,7 +2434,7 @@ void ASConsole::writeFile(const string &fileName_, FileEncoding encoding, ostrin
 	if (encoding == UTF_16LE || encoding == UTF_16BE)
 	{
 		// convert utf-8 to utf-16
-		size_t utf16Size = Utf16Length(out.str().c_str(), out.str().length());
+		size_t utf16Size = Utf16LengthFromUtf8(out.str().c_str(), out.str().length());
 		char* utf16Out = new char[utf16Size];
 		size_t utf16Len = Utf8ToUtf16(const_cast<char*>(out.str().c_str()), out.str().length(), encoding, utf16Out);
 		assert(utf16Len == utf16Size);
@@ -2437,7 +2468,284 @@ void ASConsole::writeFile(const string &fileName_, FileEncoding encoding, ostrin
 	}
 }
 
-#endif	// ASConsole:
+//-----------------------------------------------------------------------------
+// ASLibrary class
+// used by shared object (DLL) calls
+//-----------------------------------------------------------------------------
+
+#else	// ASTYLE_LIB
+
+utf16_t* ASLibrary::formatUtf16(const utf16_t* pSourceIn,		// the source to be formatted
+                                const utf16_t* pOptions,		// AStyle options
+                                fpError fpErrorHandler,			// error handler function
+                                fpAlloc fpMemoryAlloc) const	// memory allocation function)
+{
+	const char* utf8In = convertUtf16ToUtf8(pSourceIn);
+	if (utf8In == NULL)
+	{
+		fpErrorHandler(121, "Cannot convert input utf-16 to utf-8.");
+		return NULL;
+	}
+	const char* utf8Options = convertUtf16ToUtf8(pOptions);
+	if (utf8Options == NULL)
+	{
+		delete [] utf8In;
+		fpErrorHandler(122, "Cannot convert options utf-16 to utf-8.");
+		return NULL;
+	}
+	// call the Artistic Style formatting function
+	// cannot use the callers memory allocation here
+	char* utf8Out = ::AStyleMain(utf8In,
+	                             utf8Options,
+	                             fpErrorHandler,
+	                             ASLibrary::tempMemoryAllocation);
+	// finished with these
+	delete [] utf8In;
+	delete [] utf8Options;
+	utf8In = NULL;
+	utf8Options = NULL;
+	// AStyle error has already been sent
+	if (utf8Out == NULL)
+		return NULL;
+	// convert text to wide char and return it
+	utf16_t* utf16Out = convertUtf8ToUtf16(utf8Out, fpMemoryAlloc);
+	delete [] utf8Out;
+	utf8Out = NULL;
+	if (utf16Out == NULL)
+	{
+		fpErrorHandler(123, "Cannot convert output utf-8 to utf-16.");
+		return NULL;
+	}
+	return utf16Out;
+}
+
+bool ASLibrary::getBigEndian() const
+{
+	short int word = 0x0001;
+	char* byte = (char*) &word;
+	return (byte[0] ? false : true);
+}
+
+// Swap the two low order bytes of a 16 bit integer value.
+int ASLibrary::swap16bit(int value) const
+{
+	return ( ((value & 0xff) << 8) | ((value & 0xff00) >> 8) );
+}
+
+// STATIC method to allocate temporary memory for AStyle formatting.
+// The data will be converted before being returned to the calling program.
+char* STDCALL ASLibrary::tempMemoryAllocation(unsigned long memoryNeeded)
+{
+	char* buffer = new(nothrow) char [memoryNeeded];
+	return buffer;
+}
+
+// Adapted from SciTE UniConversion.cxx.
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// Modified for Artistic Style by Jim Pattee.
+//
+// Compute the length of an output utf-8 file given a utf-16 file.
+// Input tlen is the size in BYTES (not wchar_t).
+size_t ASLibrary::Utf8LengthFromUtf16(const char* data, size_t tlen, bool isBigEndian) const
+{
+	enum { SURROGATE_LEAD_FIRST = 0xD800 };
+	enum { SURROGATE_TRAIL_LAST = 0xDFFF };
+
+	size_t len = 0;
+	size_t wcharLen = tlen / 2;
+	const short* uptr = reinterpret_cast<const short*>(data);
+	for (size_t i = 0; i < wcharLen && uptr[i];)
+	{
+		size_t uch = isBigEndian ? swap16bit(uptr[i]) : uptr[i];
+		if (uch < 0x80)
+		{
+			len++;
+		}
+		else if (uch < 0x800)
+		{
+			len += 2;
+		}
+		else if ((uch >= SURROGATE_LEAD_FIRST) && (uch <= SURROGATE_TRAIL_LAST))
+		{
+			len += 4;
+			i++;
+		}
+		else
+		{
+			len += 3;
+		}
+		i++;
+	}
+	return len;
+}
+
+// Adapted from SciTE UniConversion.cxx.
+// Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
+// Modified for Artistic Style by Jim Pattee.
+//
+// Compute the length of an output utf-16 file given a utf-8 file.
+// Return value is the size in BYTES (not wchar_t).
+size_t ASLibrary::Utf16LengthFromUtf8(const char* data, size_t len) const
+{
+	size_t ulen = 0;
+	size_t charLen;
+	for (size_t i = 0; i < len;)
+	{
+		unsigned char ch = static_cast<unsigned char>(data[i]);
+		if (ch < 0x80)
+			charLen = 1;
+		else if (ch < 0x80 + 0x40 + 0x20)
+			charLen = 2;
+		else if (ch < 0x80 + 0x40 + 0x20 + 0x10)
+			charLen = 3;
+		else
+		{
+			charLen = 4;
+			ulen++;
+		}
+		i += charLen;
+		ulen++;
+	}
+	// return value is the length in bytes (not wchar_t)
+	return ulen * 2;
+}
+
+#ifdef _WIN32
+
+/**
+ * WINDOWS function to convert utf-8 strings to wchar_t (utf16) strings.
+ * Windows wchar_t is utf-16.
+ * Memory is allocated by the calling program memory allocation function.
+ * The calling function must check for errors.
+ */
+wchar_t* ASLibrary::convertUtf8ToUtf16(const char* utf8In, fpAlloc fpMemoryAlloc) const
+{
+	int wideLen = MultiByteToWideChar(CP_UTF8, 0, utf8In, -1, 0, 0);
+	if (wideLen == 0)
+		return NULL;
+	wchar_t* wide = reinterpret_cast<wchar_t*>(fpMemoryAlloc(wideLen * 2));
+	if (wide == NULL)
+		return NULL;
+	MultiByteToWideChar(CP_UTF8, 0, utf8In, -1, wide, wideLen);
+	return wide;
+}
+
+/**
+ * WINDOWS function to convert wchar_t (utf16) strings to utf-8 strings.
+ * Windows wchar_t is utf-16.
+ * The calling function must check for errors and delete the
+ * allocated memory.
+ */
+char* ASLibrary::convertUtf16ToUtf8(const wchar_t* wcharIn) const
+{
+	int utf8Len = WideCharToMultiByte(CP_UTF8, 0, wcharIn, -1, 0, 0, 0, 0);
+	if (utf8Len == 0)
+		return NULL;
+	char* utf8 = new(nothrow) char[utf8Len];
+	if (utf8 == NULL)
+		return NULL;
+	WideCharToMultiByte(CP_UTF8, 0, wcharIn, -1, utf8, utf8Len, 0, 0);
+	return utf8;
+}
+
+#else	// not _WIN32
+
+/**
+ * LINUX function to convert utf-8 strings to utf16.
+ * Linux wchar_t is utf-32.
+ * Memory is allocated by the calling program memory allocation function.
+ * The calling function must check for errors.
+ */
+utf16_t* ASLibrary::convertUtf8ToUtf16(const char* utf8In, fpAlloc fpMemoryAlloc) const
+{
+	if (utf8In == NULL)
+		return NULL;
+	iconv_t iconvh = iconv_open("UTF-16", "UTF-8//TRANSLIT");
+	if (iconvh == reinterpret_cast<iconv_t>(-1))
+		return NULL;
+	size_t utf16Len = Utf16LengthFromUtf8(utf8In, strlen(utf8In) + 1) + sizeof(utf16_t);
+	utf16_t* utf16Out = reinterpret_cast<utf16_t*>(fpMemoryAlloc(utf16Len));
+	if (utf16Out == NULL)
+		return NULL;
+	char* utf8Conv = const_cast<char*>(utf8In);
+	size_t inLeft = strlen(utf8In) + 1;		// converts the ending NULL
+	char* utf16Conv = reinterpret_cast<char*>(utf16Out);
+	size_t outLeft = utf16Len;
+	size_t iconvval = iconv(iconvh, &utf8Conv, &inLeft, &utf16Conv, &outLeft);
+	///////////////////////////////////////////////////////
+	bool showStats = false;
+	if (showStats && (inLeft != 0 || outLeft != 0))
+	{
+		cout << "-------- 8 to 16 --------" << endl;
+		cout << utf16Len << " utf16len allocated" << endl;
+		cout << inLeft << " inLeft  " << outLeft << " outLeft" << endl;
+		cout << utf16len(utf16Out) << " utf16len out" << endl;
+		cout << "-------------------------" << endl;
+	}
+	///////////////////////////////////////////////////////
+	if (iconvval == static_cast<size_t>(-1))
+		return NULL;
+	iconv_close(iconvh);
+	return utf16Out;
+}
+
+/**
+ * LINUX function to convert utf16 strings to utf-8.
+ * Linux wchar_t is utf-32.
+ * The calling function must check for errors and delete the
+ * allocated memory.
+ */
+char* ASLibrary::convertUtf16ToUtf8(const utf16_t* utf16In) const
+{
+	if (utf16In == NULL)
+		return NULL;
+	iconv_t iconvh = iconv_open("UTF-8", "UTF-16//TRANSLIT");
+	if (iconvh == reinterpret_cast<iconv_t>(-1))
+		return NULL;
+	// length must be in chars
+	size_t utf8Len = Utf8LengthFromUtf16(reinterpret_cast<char*>(const_cast<utf16_t*>(utf16In)),
+	                                     (utf16len(utf16In) * sizeof(utf16_t)), getBigEndian()) + 1;
+	char* utf8Out = new(nothrow) char[utf8Len];
+	if (utf8Out == NULL)
+		return NULL;
+	char* utf16Conv = reinterpret_cast<char*>(const_cast<utf16_t*>(utf16In));
+	// length must be in chars
+	size_t inLeft = (utf16len(utf16In) + 1) * sizeof(utf16_t);	// converts the ending NULL
+	char* utf8Conv = utf8Out;
+	size_t outLeft = utf8Len;
+	size_t iconvval = iconv(iconvh, &utf16Conv, &inLeft, &utf8Conv, &outLeft);
+	///////////////////////////////////////////////////////
+	bool showStats = false;
+	if (showStats && (inLeft != 0 || outLeft != 0))
+	{
+		cout << "-------- 16 to 8 --------" << endl;
+		cout << utf16len(utf16In) << " text16In" << endl;
+		cout << utf8Len << " utf8len allocated" << endl;
+		cout << inLeft << " inLeft  " << outLeft << " outLeft" << endl;
+		cout << strlen(utf8Out) << " utf8len out" << endl;
+		cout << "-------------------------" << endl;
+	}
+	///////////////////////////////////////////////////////
+	if (iconvval == static_cast<size_t>(-1))
+	{
+		perror("iconv error");
+		return NULL;
+	}
+	iconv_close(iconvh);
+	return utf8Out;
+}
+
+// LINUX function to return the length of a utf-16 C string.
+size_t ASLibrary::utf16len(const utf16_t* utf16In) const
+{
+	size_t length = 0;
+	while (*utf16In++ != '\0')
+		length++;
+	return length;
+}
+
+#endif	// _WIN32
+#endif	// ASTYLE_LIB
 
 //-----------------------------------------------------------------------------
 // ASOptions class
@@ -2470,7 +2778,7 @@ bool ASOptions::parseOptions(vector<string> &optionsVector, const string &errorI
 			{
 				if (i > 1
 				        && isalpha((unsigned char)arg[i])
-				        && arg[i-1] != 'x')
+				        && arg[i - 1] != 'x')
 				{
 					// parse the previous option in subArg
 					parseOption(subArg, errorInfo);
@@ -2525,7 +2833,7 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setFormattingStyle(STYLE_GNU);
 	}
-	else if ( isOption(arg, "style=linux") )
+	else if ( isOption(arg, "style=linux") || isOption(arg, "style=knf") )
 	{
 		formatter.setFormattingStyle(STYLE_LINUX);
 	}
@@ -2536,6 +2844,10 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	else if ( isOption(arg, "style=1tbs") || isOption(arg, "style=otbs") )
 	{
 		formatter.setFormattingStyle(STYLE_1TBS);
+	}
+	else if ( isOption(arg, "style=google") )
+	{
+		formatter.setFormattingStyle(STYLE_GOOGLE);
 	}
 	else if ( isOption(arg, "style=pico") )
 	{
@@ -2575,6 +2887,8 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 			formatter.setFormattingStyle(STYLE_PICO);
 		else if (style == 12)
 			formatter.setFormattingStyle(STYLE_LISP);
+		else if (style == 14)
+			formatter.setFormattingStyle(STYLE_GOOGLE);
 		else isOptionError(arg, errorInfo);
 	}
 	// must check for mode=cs before mode=c !!!
@@ -2693,6 +3007,10 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setClassIndent(true);
 	}
+	else if ( isOption(arg, "xG", "indent-modifiers") )
+	{
+		formatter.setModifierIndent(true);
+	}
 	else if ( isOption(arg, "S", "indent-switches") )
 	{
 		formatter.setSwitchIndent(true);
@@ -2705,29 +3023,17 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setLabelIndent(true);
 	}
+	else if ( isOption(arg, "w", "indent-preproc-define") )
+	{
+		formatter.setPreprocDefineIndent(true);
+	}
+	else if ( isOption(arg, "xw", "indent-preproc-cond") )
+	{
+		formatter.setPreprocConditionalIndent(true);
+	}
 	else if ( isOption(arg, "y", "break-closing-brackets") )
 	{
 		formatter.setBreakClosingHeaderBracketsMode(true);
-	}
-	else if ( isOption(arg, "b", "brackets=break") )
-	{
-		formatter.setBracketFormatMode(BREAK_MODE);
-	}
-	else if ( isOption(arg, "a", "brackets=attach") )
-	{
-		formatter.setBracketFormatMode(ATTACH_MODE);
-	}
-	else if ( isOption(arg, "l", "brackets=linux") )
-	{
-		formatter.setBracketFormatMode(LINUX_MODE);
-	}
-	else if ( isOption(arg, "u", "brackets=stroustrup") )
-	{
-		formatter.setBracketFormatMode(STROUSTRUP_MODE);
-	}
-	else if ( isOption(arg, "g", "brackets=run-in") )
-	{
-		formatter.setBracketFormatMode(RUN_IN_MODE);
 	}
 	else if ( isOption(arg, "O", "keep-one-line-blocks") )
 	{
@@ -2774,10 +3080,6 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setEmptyLineFill(true);
 	}
-	else if ( isOption(arg, "w", "indent-preprocessor") )
-	{
-		formatter.setPreprocessorIndent(true);
-	}
 	else if ( isOption(arg, "c", "convert-tabs") )
 	{
 		formatter.setTabSpaceConversionMode(true);
@@ -2806,6 +3108,10 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	else if ( isOption(arg, "J", "add-one-line-brackets") )
 	{
 		formatter.setAddOneLineBracketsMode(true);
+	}
+	else if ( isOption(arg, "xj", "remove-brackets") )
+	{
+		formatter.setRemoveBracketsMode(true);
 	}
 	else if ( isOption(arg, "Y", "indent-col1-comments") )
 	{
@@ -2899,19 +3205,81 @@ void ASOptions::parseOption(const string &arg, const string &errorInfo)
 	{
 		formatter.setBreakAfterMode(true);
 	}
-	// depreciated options release 2.02 ///////////////////////////////////////////////////////////////////////////////
-	else if ( isOption(arg, "brackets=horstmann") )
+	else if ( isOption(arg, "xc", "attach-classes") )
 	{
-		isOptionError(arg, errorInfo);
+		formatter.setAttachClass(true);
 	}
-	else if ( isOption(arg, "B", "indent-brackets") )
+	else if ( isOption(arg, "xk", "attach-extern-c") )
 	{
-		isOptionError(arg, errorInfo);
+		formatter.setAttachExternC(true);
 	}
-	else if ( isOption(arg, "G", "indent-blocks") )
+	else if ( isOption(arg, "xn", "attach-namespaces") )
 	{
-		isOptionError(arg, errorInfo);
+		formatter.setAttachNamespace(true);
 	}
+	else if ( isOption(arg, "xl", "attach-inlines") )
+	{
+		formatter.setAttachInline(true);
+	}
+	else if ( isOption(arg, "xp", "remove-comment-prefix") )
+	{
+		formatter.setStripCommentPrefix(true);
+	}
+	// Objective-C options
+	else if ( isOption(arg, "xM", "align-method-colon") )
+	{
+		formatter.setAlignMethodColon(true);
+	}
+	else if ( isOption(arg, "xQ", "pad-method-prefix") )
+	{
+		formatter.setMethodPrefixPaddingMode(true);
+	}
+	else if ( isOption(arg, "xR", "unpad-method-prefix") )
+	{
+		formatter.setMethodPrefixUnPaddingMode(true);
+	}
+	else if ( isOption(arg, "xP0", "pad-method-colon=none") )
+	{
+		formatter.setObjCColonPaddingMode(COLON_PAD_NONE);
+	}
+	else if ( isOption(arg, "xP1", "pad-method-colon=all") )
+	{
+		formatter.setObjCColonPaddingMode(COLON_PAD_ALL);
+	}
+	else if ( isOption(arg, "xP2", "pad-method-colon=after") )
+	{
+		formatter.setObjCColonPaddingMode(COLON_PAD_AFTER);
+	}
+	else if ( isOption(arg, "xP3", "pad-method-colon=before") )
+	{
+		formatter.setObjCColonPaddingMode(COLON_PAD_BEFORE);
+	}
+	// depreciated options ////////////////////////////////////////////////////////////////////////////////////////////
+	else if ( isOption(arg, "indent-preprocessor") )	// depreciated release 2.04
+	{
+		formatter.setPreprocDefineIndent(true);
+	}
+//  NOTE: Removed in release 2.04.
+//	else if ( isOption(arg, "b", "brackets=break") )
+//	{
+//		formatter.setBracketFormatMode(BREAK_MODE);
+//	}
+//	else if ( isOption(arg, "a", "brackets=attach") )
+//	{
+//		formatter.setBracketFormatMode(ATTACH_MODE);
+//	}
+//	else if ( isOption(arg, "l", "brackets=linux") )
+//	{
+//		formatter.setBracketFormatMode(LINUX_MODE);
+//	}
+//	else if ( isOption(arg, "u", "brackets=stroustrup") )
+//	{
+//		formatter.setBracketFormatMode(STROUSTRUP_MODE);
+//	}
+//	else if ( isOption(arg, "g", "brackets=run-in") )
+//	{
+//		formatter.setBracketFormatMode(RUN_IN_MODE);
+//	}
 	// end depreciated options ////////////////////////////////////////////////////////////////////////////////////////
 #ifdef ASTYLE_LIB
 	// End of options used by GUI /////////////////////////////////////////////////////////////////////////////////////
@@ -3019,12 +3387,12 @@ void ASOptions::importOptions(istream &in, vector<string> &optionsVector)
 				while (in)
 				{
 					in.get(ch);
-					if (ch == '\n')
+					if (ch == '\n' || ch == '\r')
 						break;
 				}
 
 			// break options on spaces, tabs, commas, or new-lines
-			if (in.eof() || ch == ' ' || ch == '\t' || ch == ',' || ch == '\n')
+			if (in.eof() || ch == ' ' || ch == '\t' || ch == ',' || ch == '\n' || ch == '\r')
 				break;
 			else
 				currentToken.append(1, ch);
@@ -3084,17 +3452,20 @@ bool ASOptions::isParamOption(const string &arg, const char* option1, const char
 	return isParamOption(arg, option1) || isParamOption(arg, option2);
 }
 
+//----------------------------------------------------------------------------
 
-// *******************   end of ASOptions functions   *********************************************
+}   // end of astyle namespace
 
-}   // end of namespace astyle
-
-// *******************   end of astyle namespace    ***********************************************
+//----------------------------------------------------------------------------
 
 using namespace astyle;
 
+//----------------------------------------------------------------------------
+// ASTYLE_JNI functions for calling AStyleMain
+//----------------------------------------------------------------------------
+
 #ifdef ASTYLE_JNI
-// *************************   JNI functions   ****************************************************
+
 // called by a java program to get the version number
 // the function name is constructed from method names in the calling java program
 extern "C"  EXPORT
@@ -3118,7 +3489,7 @@ jstring STDCALL Java_AStyleInterface_AStyleMain(JNIEnv* env,
 
 	// get the method ID
 	jclass cls = env->GetObjectClass(obj);
-	g_mid = env->GetMethodID(cls, "ErrorHandler","(ILjava/lang/String;)V");
+	g_mid = env->GetMethodID(cls, "ErrorHandler", "(ILjava/lang/String;)V");
 	if (g_mid == 0)
 	{
 		cout << "Cannot find java method ErrorHandler" << endl;
@@ -3158,19 +3529,65 @@ char* STDCALL javaMemoryAlloc(unsigned long memoryNeeded)
 	char* buffer = new(nothrow) char [memoryNeeded];
 	return buffer;
 }
-#endif
+#endif	// ASTYLE_JNI
+
+//----------------------------------------------------------------------------
+// Entry point for AStyleMainUtf16
+//----------------------------------------------------------------------------
 
 #ifdef ASTYLE_LIB
-// *************************   GUI functions   ****************************************************
+
+extern "C" EXPORT utf16_t* STDCALL AStyleMainUtf16(const utf16_t* pSourceIn,	// the source to be formatted
+                                                   const utf16_t* pOptions,		// AStyle options
+                                                   fpError fpErrorHandler,		// error handler function
+                                                   fpAlloc fpMemoryAlloc)		// memory allocation function
+{
+	if (fpErrorHandler == NULL)         // cannot display a message if no error handler
+		return NULL;
+
+	if (pSourceIn == NULL)
+	{
+		fpErrorHandler(101, "No pointer to source input.");
+		return NULL;
+	}
+	if (pOptions == NULL)
+	{
+		fpErrorHandler(102, "No pointer to AStyle options.");
+		return NULL;
+	}
+	if (fpMemoryAlloc == NULL)
+	{
+		fpErrorHandler(103, "No pointer to memory allocation function.");
+		return NULL;
+	}
+#ifndef _WIN32
+	// check size of utf16_t on Linux
+	int sizeCheck = 2;
+	if (sizeof(utf16_t) != sizeCheck)
+	{
+		fpErrorHandler(104, "Unsigned short is not the correct size.");
+		return NULL;
+	}
+#endif
+
+	ASLibrary library;
+	utf16_t* utf16Out = library.formatUtf16(pSourceIn, pOptions, fpErrorHandler, fpMemoryAlloc);
+	return utf16Out;
+}
+
+//----------------------------------------------------------------------------
+// ASTYLE_LIB functions for calling AStyleMain
+//----------------------------------------------------------------------------
 /*
+ * This is apparently no longer required.
  * IMPORTANT VC DLL linker for WIN32 must have the parameter  /EXPORT:AStyleMain=_AStyleMain@16
  *                                                            /EXPORT:AStyleGetVersion=_AStyleGetVersion@0
  * No /EXPORT is required for x64
  */
-extern "C" EXPORT char* STDCALL AStyleMain(const char* pSourceIn,          // pointer to the source to be formatted
-                                           const char* pOptions,           // pointer to AStyle options, separated by \n
-                                           fpError fpErrorHandler,         // pointer to error handler function
-                                           fpAlloc fpMemoryAlloc)          // pointer to memory allocation function
+extern "C" EXPORT char* STDCALL AStyleMain(const char* pSourceIn,		// the source to be formatted
+                                           const char* pOptions,		// AStyle options
+                                           fpError fpErrorHandler,		// error handler function
+                                           fpAlloc fpMemoryAlloc)		// memory allocation function
 {
 	if (fpErrorHandler == NULL)         // cannot display a message if no error handler
 		return NULL;
@@ -3199,11 +3616,9 @@ extern "C" EXPORT char* STDCALL AStyleMain(const char* pSourceIn,          // po
 
 	options.importOptions(opt, optionsVector);
 
-	bool ok = options.parseOptions(optionsVector,
-	                               "Invalid Artistic Style options:");
-
+	bool ok = options.parseOptions(optionsVector, "Invalid Artistic Style options:");
 	if (!ok)
-		fpErrorHandler(210, options.getOptionErrors().c_str());
+		fpErrorHandler(130, options.getOptionErrors().c_str());
 
 	istringstream in(pSourceIn);
 	ASStreamIterator<istringstream> streamIterator(&in);
@@ -3228,10 +3643,9 @@ extern "C" EXPORT char* STDCALL AStyleMain(const char* pSourceIn,          // po
 
 	unsigned long textSizeOut = out.str().length();
 	char* pTextOut = fpMemoryAlloc(textSizeOut + 1);     // call memory allocation function
-//    pTextOut = NULL;           // for testing
 	if (pTextOut == NULL)
 	{
-		fpErrorHandler(110, "Allocation failure on output.");
+		fpErrorHandler(120, "Allocation failure on output.");
 		return NULL;
 	}
 
@@ -3256,7 +3670,9 @@ extern "C" EXPORT const char* STDCALL AStyleGetVersion (void)
 // ASTYLECON_LIB is defined to exclude "main" from the test programs
 #elif !defined(ASTYLECON_LIB)
 
-// *************************   main function   ****************************************************
+//----------------------------------------------------------------------------
+// main function functions for ASConsole build
+//----------------------------------------------------------------------------
 
 int main(int argc, char** argv)
 {

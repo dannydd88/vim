@@ -17,7 +17,7 @@ Build it according to `Makefile` in `build/gcc` or `build/clang` or `build/intel
 1. Add the following code *(from line 9 to 12)* into your **vimrc** file.
     ```
     function FormatCode()
-    silent! execute "%!astyle --ascii --style=allman --indent=spaces=4 --indent-classes --indent-switches --indent-cases --indent-preprocessor --indent-col1-comments --min-conditional-indent=0 --max-instatement-indent=60 --break-blocks --pad-oper --pad-header --align-pointer=middle --align-reference=type --add-brackets --convert-tabs --lineend=linux"
+    silent! execute "%!astyle --ascii --style=allman --indent=spaces=4 --indent-classes --indent-switches --indent-cases --indent-preproc-define --indent-coll-comments --min-conditional-indent=0 --max-instatement-indent=60 --break-blocks --pad-oper --pad-header --align-pointer=middle --align-reference=type --add-brackets --convert-tabs --lineend=linux"
     endfunction
     map <C-S-F> :call FormatCode() <CR>
     ```
