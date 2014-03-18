@@ -105,7 +105,7 @@ else
     let Grep_Xargs_Path =   '/usr/bin/xargs'
 endif
 let Grep_Skip_Files = '*.bak *~'
-let Grep_Default_Filelist = '*.c *.cpp *.h'
+let Grep_Default_Filelist = '*.c *.cpp *.cc *.h'
 let Grep_Skip_Dirs = '.svn .git'
 
 "cscopes使用
