@@ -2,12 +2,24 @@
 set nocompatible
 
 
+" Filetype relatived
+if has("win32")
+    so $VIM/vimfiles/ft.vim
+else
+    so $HOME/.vim/ft.vim
+endif
+
+
 " Tab relatived
 set tabstop=4
 set shiftwidth=4
 set softtabstop=4
 set expandtab
-set ambiwidth=double
+
+
+" Indent related
+set cindent
+set cinoptions=t0N-s(0j1
 
 
 " Editing related
@@ -15,6 +27,7 @@ set backspace=indent,eol,start
 
 
 " Encoding related
+set ambiwidth=double
 set fileformat=unix
 set encoding=utf-8
 set langmenu=zh_CN.utf-8
@@ -32,8 +45,8 @@ language messages zh_CN.utf-8
 
 
 " File type related
-"filetype plugin indent on
-filetype plugin on
+filetype plugin indent on
+"filetype plugin on
 
 
 " Display related
@@ -44,11 +57,6 @@ set hlsearch
 set incsearch
 colorscheme torte
 syntax on
-
-
-" Indent related
-set cindent
-set cinoptions=t0N-s(0j1
 
 
 "启动窗口位置&大小
