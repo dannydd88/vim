@@ -85,6 +85,7 @@ endif
 "a.vim 快速切换头和源文件
 nnoremap <silent> <F12> :A<CR>
 
+
 "grep.vim 工程中快速查找
 nnoremap <silent> <F3> :Grep<CR>
 nnoremap <silent> <F2> :Rgrep<CR>
@@ -108,6 +109,7 @@ let Grep_Skip_Files = '*.bak *~'
 let Grep_Default_Filelist = '*.c *.cpp *.cc *.h'
 let Grep_Skip_Dirs = '.svn .git'
 
+
 "cscopes使用
 function UpdateCscope()
     cs kill 0
@@ -127,12 +129,27 @@ function UpdateCscope()
 endfunction
 map <C-F10>c :call UpdateCscope() <CR>
 
-"代码格式
-function FormatCode()
-    silent! execute "%!astyle --ascii --style=allman --indent=spaces=4 --indent-classes --indent-switches --indent-cases --indent-preproc-define --indent-col1-comments --min-conditional-indent=0 --max-instatement-indent=60 --break-blocks --pad-oper --pad-header --align-pointer=middle --align-reference=type --add-brackets --convert-tabs --lineend=linux"
-endfunction
-map <C-S-F> :call FormatCode() <CR>
 
+"Clang format
+if has("win32")
+    " work in normal & virsual mode
+    map <C-F> :%pyf $VIM/vimfiles/clang-format.py<CR>
+    " work in insert mode
+    "imap <C-F> <ESC>:pyf $VIM/vimfiles/clang-format.py<CR>i
+else
+    map <C-F> :%pyf $HOME/.vim/clang-format.py<CR>
+    "imap <C-F> <ESC>:pyf $HOME/.vim/clang-format.py<CR>i
+endif
+
+
+"代码格式
+"function FormatCode()
+"    silent! execute "%!astyle --ascii --style=allman --indent=spaces=4 --indent-classes --indent-switches --indent-cases --indent-preproc-define --indent-col1-comments --min-conditional-indent=0 --max-instatement-indent=60 --break-blocks --pad-oper --pad-header --align-pointer=middle --align-reference=type --add-brackets --convert-tabs --lineend=linux"
+"endfunction
+"map <C-S-F> :call FormatCode() <CR>
+
+
+"diff
 set diffexpr=MyDiff()
 function MyDiff()
   let opt = '-a --binary '
