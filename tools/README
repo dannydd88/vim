@@ -1,0 +1,15 @@
+cscope:
+
+http://cscope.sourceforge.net/
+
+dependencies:
+sudo apt-get install libncurses-dev
+sudo apt-get install flex
+sudo apt-get install byacc
+
+
+ctags:
+
+http://ctags.sourceforge.net/
+
+
