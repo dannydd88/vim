@@ -11,12 +11,15 @@ let b:did_indent = 1
 setlocal nolisp		" Make sure lisp indenting doesn't supersede us
 setlocal autoindent	" indentexpr isn't much help otherwise
 
+setlocal shiftwidth=2
+setlocal tabstop=2
+setlocal softtabstop=2
+setlocal expandtab
+setlocal textwidth=80
+setlocal wrap
+
 setlocal indentexpr=GetGooglePythonIndent(v:lnum)
 setlocal indentkeys+=<:>,=elif,=except
-
-setlocal expandtab
-setlocal tabstop=2
-setlocal shiftwidth=2
 
 " Come here when loading the script the first time.
 let s:maxoff = 50 " maximum number of lines to look backwards.
@@ -24,7 +27,7 @@ let s:maxoff = 50 " maximum number of lines to look backwards.
 let pyindent_nested_paren="&sw*2"
 let pyindent_open_paren="&sw*2"
 
-function GetPythonIndent(lnum)
+function! GetPythonIndent(lnum)
 
   " If this line is explicitly joined: If the previous line was also joined,
   " line it up with that one, otherwise add two 'shiftwidth'
@@ -188,7 +191,7 @@ function GetPythonIndent(lnum)
 
 endfunction
 
-function GetGooglePythonIndent(lnum)
+function! GetGooglePythonIndent(lnum)
 
   " Indent inside parens.
   " Align with the open paren unless it is at the end of the line.
