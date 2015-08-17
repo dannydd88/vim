@@ -1,3 +1,5 @@
+"My own vim config
+"dannygodii@gmail.com
 
 set nocompatible
 
@@ -85,30 +87,13 @@ endif
 "a.vim 快速切换头和源文件
 nnoremap <silent> <F12> :A<CR>
 
-
-"grep.vim 工程中快速查找
-nnoremap <silent> <F3> :Grep<CR>
-nnoremap <silent> <F2> :Rgrep<CR>
-if (has("win32"))
-    let Grep_Path =         'C:\MinGW\msys\1.0\bin\grep.exe'
-    let Fgrep_Path =        'C:\MinGW\msys\1.0\bin\fgrep.exe'
-    let Egrep_Path =        'C:\MinGW\msys\1.0\bin\egrep.exe'
-    let Agrep_Path =        'C:\MinGW\msys\1.0\bin\agrep.exe'
-    let Grep_Find_Path =    'C:\MinGW\msys\1.0\bin\find.exe'
-    let Grep_Xargs_Path =   'C:\MinGW\msys\1.0\bin\xargs.exe'
-else
-    "grep path (need mingw)
-    let Grep_Path =         '/bin/grep'
-    let Fgrep_Path =        '/bin/fgrep'
-    let Egrep_Path =        '/bin/egrep'
-    let Agrep_Path =        '/usr/bin/agrep'
-    let Grep_Find_Path =    '/usr/bin/find'
-    let Grep_Xargs_Path =   '/usr/bin/xargs'
-endif
-let Grep_Skip_Files = '*.bak *~'
-let Grep_Default_Filelist = '*.c *.cpp *.cc *.h'
-let Grep_Skip_Dirs = '.svn .git'
-
+"EasyGrep.vim
+nnoremap <F3> :Grep<space>
+let g:EasyGrepAllOptionsInExplorer = 1
+let g:EasyGrepRecursive = 1
+let g:EasyGrepSearchCurrentBufferDir = 0
+let g:EasyGrepFilesToExclude = '*.bak,*~,.svn/*,.git/*'
+let g:EasyGrepDefaultUserPattern = '*.gypi *.gyp'
 
 "cscopes使用
 function UpdateCscope()
