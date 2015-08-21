@@ -3,15 +3,6 @@
 
 set nocompatible
 
-
-" Filetype relatived
-if has("win32")
-    so $VIM/vimfiles/ft.vim
-else
-    so $HOME/.vim/ft.vim
-endif
-
-
 " Tab relatived
 set tabstop=4
 set shiftwidth=4
