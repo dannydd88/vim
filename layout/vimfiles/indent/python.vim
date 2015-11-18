@@ -21,6 +21,8 @@ setlocal wrap
 setlocal indentexpr=GetGooglePythonIndent(v:lnum)
 setlocal indentkeys+=<:>,=elif,=except
 
+let b:undo_indent = "setl nolisp< ai< sw< ts< sts< et< tw< wrap< inde< indk<"
+
 " Come here when loading the script the first time.
 let s:maxoff = 50 " maximum number of lines to look backwards.
 

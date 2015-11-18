@@ -9,9 +9,16 @@ if exists("b:did_indent")
 endif
 let b:did_indent = 1
 
+setlocal nolisp
+
 " C indenting is not too bad.
 setlocal cindent
 setlocal cinoptions+=j1,J1
 
-let b:undo_indent = "setl cin<"
+setlocal shiftwidth=2
+setlocal tabstop=2
+setlocal softtabstop=2
+setlocal expandtab
+
+let b:undo_indent = "setl nolisp< cin< cino< sw< ts< sts< et<"
 

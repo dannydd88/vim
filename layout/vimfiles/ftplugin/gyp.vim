@@ -22,5 +22,5 @@ setlocal comments=sO:*\ -,mO:*\ \ ,exO:*/,s1:/*,mb:*,ex:*/,://
 
 setlocal commentstring=#%s
 
-let b:undo_ftplugin = "setl fo< ofu< com< cms<" 
+let b:undo_ftplugin = "setl fo< com< cms<" 
 
