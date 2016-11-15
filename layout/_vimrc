@@ -13,6 +13,9 @@ set expandtab
 " Indent related
 set cindent
 set cinoptions=t0N-s(0j1
+if v:version > 800
+    set breakindent
+endif
 
 
 " Editing related
@@ -53,8 +56,10 @@ syntax on
 
 
 "启动窗口位置&大小
-winpos 170 60
-set lines=50 columns=170
+if (has("mac") != 1)
+    winpos 170 60
+    set lines=50 columns=170
+endif
 
 
 "=============================================================================
@@ -69,6 +74,9 @@ else
     if (has("gui_running"))
         set guifont=Bitstream\ Vera\ Sans\ Mono\ 10
     endif
+endif
+if (has("gui_macvim"))
+    set shell=bash
 endif
 
 
