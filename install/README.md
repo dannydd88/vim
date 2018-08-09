@@ -1,12 +1,12 @@
-# Vim:
+# Vim
 
 http://www.vim.org/
 
-## Vim doc:
+## Vim doc
 
 http://vimcdoc.sourceforge.net/
 
-## GVim for x64:
+## GVim for x64
 
 https://bintray.com/veegee/generic/vim_x64
 
