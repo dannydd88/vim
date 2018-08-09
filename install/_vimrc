@@ -56,12 +56,14 @@ syntax on
 
 
 " Window pos & size
-set lines=60 columns=150
-if (has("mac") != 1)
-  winpos 170 60
-else
-  " fix mac vim #721 issue
-  autocmd VimEnter * set columns=151
+if (has("gui_running"))
+  set lines=60 columns=150
+  if (has("mac") != 1)
+    winpos 170 60
+  else
+    " fix mac vim #721 issue
+    autocmd VimEnter * set columns=151
+  endif
 endif
 
 
