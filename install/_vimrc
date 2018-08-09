@@ -1,5 +1,5 @@
-"My own vim config
-"dannygodii@gmail.com
+" My own vim config
+" dannygodii@gmail.com
 
 set nocompatible
 
@@ -14,7 +14,7 @@ set expandtab
 set cindent
 set cinoptions=t0N-s(0j1
 if v:version > 800
-    set breakindent
+  set breakindent
 endif
 
 
@@ -29,14 +29,14 @@ set encoding=utf-8
 set langmenu=zh_CN.utf-8
 set fileencodings=utf-8,chinese,latin-1
 if has("win32")
-    set fileencoding=chinese
+  set fileencoding=chinese
 else
-    set fileencoding=utf-8
+  set fileencoding=utf-8
 endif
-"解决菜单乱码问题
+"fix menu encoding issue
 source $VIMRUNTIME/delmenu.vim
 source $VIMRUNTIME/menu.vim
-"解决console输出乱码
+"console encoding
 language messages zh_CN.utf-8
 
 
@@ -55,37 +55,40 @@ colorscheme torte
 syntax on
 
 
-"启动窗口位置&大小
+" Window pos & size
+set lines=60 columns=150
 if (has("mac") != 1)
-    winpos 170 60
-    set lines=50 columns=170
+  winpos 170 60
+else
+  " fix mac vim #721 issue
+  autocmd VimEnter * set columns=151
 endif
 
 
 " Gui settings
 if (has("win32"))
-    if (has("gui_running"))
-        set guifont=Bitstream_Vera_Sans_Mono:h10:cANSI
-        set gfw=Yahei_Mono:h10.5:cGB2312
-    endif
+  if (has("gui_running"))
+    set guifont=Bitstream_Vera_Sans_Mono:h10:cANSI
+    set gfw=Yahei_Mono:h10.5:cGB2312
+  endif
 else
-    if (has("gui_running"))
-        set guifont=Bitstream\ Vera\ Sans\ Mono\ 10
-    endif
+  if (has("gui_running"))
+    set guifont=Bitstream\ Vera\ Sans\ Mono\ 10
+  endif
 endif
 
 
 " Shell settings
 if (has("gui_macvim"))
-    set shell=bash
+  set shell=bash
 endif
 
 
 " *.swp file settings
 if (has("win32"))
-    set directory=.,c:\temp\\
+  set directory=.,c:\temp\\
 else
-    set directory=/tmp//,.
+  set directory=/tmp//,.
 endif
 
 
@@ -105,44 +108,44 @@ let g:EasyGrepDefaultUserPattern = '*.gypi *.gyp'
 
 "cscopes使用
 function UpdateCscope()
-    cs kill 0
-    if (has("win32"))
-        silent! execute "!dir *.cpp *.h *.hpp *.c *.java *.cc /s /B > tmplist"
-    else
-        silent! execute "!find -name '*.c' -o -name '*.cpp' -o -name '*.cc' -o -name '*.h' -o -name '*.hpp' -o -name '*.java' -type f > tmplist"
-    endif
-    silent! execute "!cscope -bqk -i tmplist"
-    silent! execute "!ctags -R -L tmplist"
-    if (has("win32"))
-        silent! execute "!del tmplist"
-    else
-        silent! execute "!rm -f tmplist"
-    endif
-    cs add cscope.out
+  cs kill 0
+  if (has("win32"))
+    silent! execute "!dir *.cpp *.h *.hpp *.c *.java *.cc /s /B > tmplist"
+  else
+    silent! execute "!find -name '*.c' -o -name '*.cpp' -o -name '*.cc' -o -name '*.h' -o -name '*.hpp' -o -name '*.java' -type f > tmplist"
+  endif
+  silent! execute "!cscope -bqk -i tmplist"
+  silent! execute "!ctags -R -L tmplist"
+  if (has("win32"))
+    silent! execute "!del tmplist"
+  else
+    silent! execute "!rm -f tmplist"
+  endif
+  cs add cscope.out
 endfunction
 map <C-F10>c :call UpdateCscope() <CR>
 
 
-"Clang format
+" Clang format
 if has("win32")
-    " work in normal & virsual mode
-    map <C-F> :%pyf $VIM/vimfiles/clang-format.py<CR>
-    " work in insert mode
-    "imap <C-F> <ESC>:pyf $VIM/vimfiles/clang-format.py<CR>i
+  " work in normal & virsual mode
+  map <C-F> :%pyf $VIM/vimfiles/clang-format.py<CR>
+  " work in insert mode
+  "imap <C-F> <ESC>:pyf $VIM/vimfiles/clang-format.py<CR>i
 else
-    map <C-F> :%pyf $HOME/.vim/clang-format.py<CR>
-    "imap <C-F> <ESC>:pyf $HOME/.vim/clang-format.py<CR>i
+  map <C-F> :%pyf $HOME/.vim/clang-format.py<CR>
+  "imap <C-F> <ESC>:pyf $HOME/.vim/clang-format.py<CR>i
 endif
 
 
-"代码格式
+" Format Code
 "function FormatCode()
 "    silent! execute "%!astyle --ascii --style=allman --indent=spaces=4 --indent-classes --indent-switches --indent-cases --indent-preproc-define --indent-col1-comments --min-conditional-indent=0 --max-instatement-indent=60 --break-blocks --pad-oper --pad-header --align-pointer=middle --align-reference=type --add-brackets --convert-tabs --lineend=linux"
 "endfunction
 "map <C-S-F> :call FormatCode() <CR>
 
 
-"diff
+" Diff
 function MyDiff()
   let opt = '-a --binary '
   if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
@@ -174,7 +177,7 @@ endfunction
 
 """""""""""""""""""""""""""""""""
 "abandon plusin
-""TList插件
+""TList plugin
 "let Tlist_Show_One_File=1
 ""let Tlist_Exit_OnlyWindow=1
 ""winmanager
