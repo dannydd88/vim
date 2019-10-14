@@ -60,22 +60,19 @@ if (has("gui_running"))
   set lines=60 columns=150
   if (has("mac") != 1)
     winpos 170 60
-  else
-    " fix mac vim #721 issue
-    autocmd VimEnter * set columns=151
   endif
 endif
 
 
 " Gui settings
 if (has("win32"))
+  set guifont=Bitstream_Vera_Sans_Mono:h10:cANSI
   if (has("gui_running"))
-    set guifont=Bitstream_Vera_Sans_Mono:h10:cANSI
     set gfw=Yahei_Mono:h10.5:cGB2312
   endif
 else
+  set guifont=Monaco:h12
   if (has("gui_running"))
-    set guifont=Bitstream\ Vera\ Sans\ Mono\ 10
   endif
 endif
 
