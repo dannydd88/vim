@@ -84,7 +84,7 @@ endif
 
 " *.swp file settings
 if (has("win32"))
-  set directory=%TEMP%,.
+  set directory=%TEMP%//,.
 else
   set directory=/tmp//,.
 endif
