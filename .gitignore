@@ -9,3 +9,4 @@ lib*
 config.h
 /tools/*/*.exe
 .DS_Store
+.netrwhist
