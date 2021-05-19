@@ -16,6 +16,8 @@ set cinoptions=t0N-s(0j1
 if v:version > 800
   set breakindent
 endif
+set cinkeys-=0#
+set indentkeys-=0#
 
 
 " Editing related
