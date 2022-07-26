@@ -56,6 +56,10 @@ set incsearch
 colorscheme torte
 syntax on
 
+if v:version >= 900
+  hi! link CurSearch Search
+endif
+
 
 " Window pos & size
 if (has("gui_running"))
