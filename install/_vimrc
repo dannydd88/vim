@@ -57,6 +57,9 @@ colorscheme torte
 syntax on
 
 if v:version >= 900
+  hi Search guifg=#ff0000 guibg=#000000 gui=reverse,bold ctermfg=Red ctermbg=Black cterm=reverse,bold
+  hi PmenuSel guifg=#000000 guibg=#ff00ff gui=bold ctermfg=16 ctermbg=13 cterm=bold
+  hi Visual guifg=#a9a9a9 guibg=#000000 gui=reverse,bold ctermfg=248 ctermbg=16 cterm=reverse,bold
   hi! link CurSearch Search
 endif
 
